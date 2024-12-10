@@ -73,6 +73,21 @@ let rec analyse_tds_expression tds e = match e with
     let nexpr1 = analyse_tds_expression tds expr1 in
     let nexpr2 = analyse_tds_expression tds expr2 in
     AstTds.Binaire(op, nexpr1, nexpr2)
+  (* L'identifiant est une adresse *)
+  | AstSyntax.Adresse n -> 
+    begin
+      (* On cherche l'identifiant dans la TDS globalement*)
+      match chercherGlobalement tds n with
+      | None -> raise (IdentifiantNonDeclare n) (* L'identifiant n'a pas été trouvé dans la TDS globale, il est non déclaré *)
+      | Some info -> 
+        begin
+          match !info with
+          | InfoVar _ -> AstTds.Adresse info
+          | _ -> raise (MauvaiseUtilisationIdentifiant n)
+        end
+    end
+  | AstSyntax.Null -> AstTds.Null
+  | AstSyntax.New t -> AstTds.New t
 
 
 (* analyse_tds_instruction : tds -> info_ast option -> AstSyntax.instruction -> AstTds.instruction *)

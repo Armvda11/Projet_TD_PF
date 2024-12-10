@@ -41,9 +41,14 @@ type expression =
   | Unaire of unaire * expression
   (* Opération binaire représentée par l'opérateur, l'opérande gauche et l'opérande droite *)
   | Binaire of binaire * expression * expression
+  (* Affectable *)
   | Affectable of affectable
+  (* Null *)
   | Null 
+  (* Nouveau typ *)
   | New of typ
+  (* Adresse d'une variable *)
+  | Adresse of string
 
 (* Instructions de Rat *)
 type bloc = instruction list
@@ -95,6 +100,10 @@ struct
     | Affectable of affectable
     | Unaire of AstSyntax.unaire * expression
     | Binaire of AstSyntax.binaire * expression * expression
+    | Null
+    | New of typ
+    | Adresse of Tds.info_ast
+  
 
   (* instructions existantes dans notre langage *)
   (* ~ instruction de l'AST syntaxique où les noms des identifiants ont été
@@ -109,6 +118,7 @@ struct
     | TantQue of expression * bloc
     | Retour of expression * Tds.info_ast  (* les informations sur la fonction à laquelle est associé le retour *)
     | Empty (* les nœuds ayant disparus: Const *)
+    
 
 
   (* Structure des fonctions dans notre langage *)
@@ -134,15 +144,26 @@ type unaire = Numerateur | Denominateur
 (* Opérateurs binaires existants dans Rat - résolution de la surcharge *)
 type binaire = Fraction | PlusInt | PlusRat | MultInt | MultRat | EquInt | EquBool | Inf
 
+(* Affectable existant dans Rat *)
+(* = affectable de AstTds *)
+type affectable = 
+  | Ident of Tds.info_ast
+  | Deref of affectable
+
+
 (* Expressions existantes dans Rat *)
 (* = expression de AstTds *)
 type expression =
   | AppelFonction of Tds.info_ast * expression list
-  | Ident of Tds.info_ast
   | Booleen of bool
   | Entier of int
   | Unaire of unaire * expression
   | Binaire of binaire * expression * expression
+  | Affectable of affectable
+  | Null
+  | New of typ
+  | Adresse of Tds.info_ast
+
 
 (* instructions existantes Rat *)
 (* = instruction de AstTds + informations associées aux identificateurs, mises à jour *)
@@ -150,7 +171,7 @@ type expression =
 type bloc = instruction list
  and instruction =
   | Declaration of Tds.info_ast * expression
-  | Affectation of Tds.info_ast * expression
+  | Affectation of affectable * expression
   | AffichageInt of expression
   | AffichageRat of expression
   | AffichageBool of expression

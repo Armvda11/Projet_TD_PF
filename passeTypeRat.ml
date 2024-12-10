@@ -10,6 +10,26 @@ type t1 = Ast.AstTds.programme
 type t2 = Ast.AstType.programme
 
 
+(* analyse_type_affectable : tds -> AstTds.affectable -> AstType.affectable *)
+(* Paramètre a : l'affectable à analyser *)
+(* Vérifie le bon type des affectables *)
+(* Erreur si le type de l'affectable ne correspond pas au type attendu *)
+let rec analyse_type_affectable a =
+  match a with
+  | AstTds.Ident info -> 
+    begin
+      match !info with
+      | InfoVar(_,t,_,_) -> (AstType.Ident info, t)
+      | InfoConst(_,_) -> (AstType.Ident info, Int)
+      | _ -> raise (MauvaiseUtilisationIdentifiant "variable")
+    end
+  | AstTds.Deref a -> 
+    (* Vérifier que l'affectable est bien un pointeur *)
+    (* Récupérer le type de l'affectable *)
+    let (na,ta) = analyse_type_affectable a in
+    match ta with
+    | Pointeur t -> (AstType.Deref na, t)
+    | _ -> raise (TypeInattendu (ta, Pointeur Int))
 
 (* analyse_tds_expression : tds -> AstTds.expression -> AstType.expression *)
 (* Paramètre e : l'expression à analyser *)
@@ -37,15 +57,10 @@ let rec analyse_type_expression e =
     |AstTds.Booleen b -> (Booleen(b),Bool)
      (* l'expression est un entier , on renvoie un type Int*)
     |AstTds.Entier n -> (Entier(n),Int)
-    (* l'expression est un identifiant *)
-    | AstTds.Ident info -> 
-    begin
-      match !info with
-      (* (vérifie que l'identifiant est une variable ou une constante) *)
-      | InfoVar(_,t,_,_) -> (Ident(info),t)
-      | InfoConst(_,_) -> (Ident(info), Int)
-      | _ -> failwith "type error : type inconnu"
-    end 
+    (* l'expression est un affectable , on renvoie le type de l'affectable *)
+    |AstTds.Affectable a -> 
+      (* on vérifie que l'affectable est bien un affectable *)
+      let (na,ta) = analyse_type_affectable a in (AstType.Affectable na,ta)
     (* l'expression est un unaire n , et donc un rationnel *)
     |AstTds.Unaire (u,exp) -> let (expType,te) = analyse_type_expression exp in
     if (te = Rat) then
@@ -69,6 +84,18 @@ let rec analyse_type_expression e =
        | Bool,Equ,Bool -> (Binaire(EquBool,ne1,ne2),Bool)
        | Int,Inf,Int -> (Binaire(Inf,ne1,ne2),Bool)
        | _ -> raise(TypeBinaireInattendu(binaire,t1,t2))   
+    end
+    
+    | AstTds.Null -> (AstType.Null,Pointeur(Undefined))
+    | AstTds.New t -> (AstType.New t,Pointeur t)
+    (* l'expression est une adresse , on renvoie le type de l'adresse *)
+    | AstTds.Adresse n ->  
+    (* on vérifie que l'identifiant est une variable *)
+    begin
+      match !n with  (* Recherche des informations associées à l'identifiant `n` dans la table des symboles (TDS) *)
+      | InfoVar(_,t,_,_) ->  
+          (AstType.Adresse n, Pointeur t)  (* On renvoie une paire : l'adresse de l'identifiant transformée pour l'AST de type et un pointeur vers le type `t` *)
+      | _ -> raise (MauvaiseUtilisationIdentifiant "variable")  
     end
 
 
@@ -94,17 +121,13 @@ let rec analyse_type_instruction i =
   | AstTds.Affectation(info, e) -> 
     (* on analyse le type de l'expression *)
     let (ne,te) = analyse_type_expression e in
-    begin
-    (* on vérifie que l'identifiant est une variable et on vérifie si son type est compatible avec l'affectation *)
-    match !info with 
-    | InfoVar(_,t,_,_) -> 
-      if  est_compatible t te then
-       ( modifier_type_variable te info ;
-        AstType.Affectation(info,ne))
-      else
-        raise (TypeInattendu ( te,t))
-    | _ -> failwith "erreur interne : affectation sur un non-variable"
-      end
+    (* on vérifie que le type de l'expression est compatible avec le type de l'affectable *)
+    let (na,ta) = analyse_type_affectable info in
+    if est_compatible ta  te then
+      AstType.Affectation(na,ne)
+    else
+      raise (TypeInattendu ( te,ta))
+      
   (* l'instruction est un affichage , on fait les affichages distints en fonction des types *)
  | AstTds.Affichage e -> 
     let (ne, te) = analyse_type_expression e in
