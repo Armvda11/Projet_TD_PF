@@ -1,0 +1,2 @@
+static bool z = true;
+static rat y = [9/3];

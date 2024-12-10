@@ -1,0 +1,7 @@
+static int x = 0;
+
+test {
+    int y = (x+1);
+    x = (y-2);
+    int z = x;
+}

@@ -1,0 +1,12 @@
+static int y = 0;
+static int z = 18;
+
+test {
+    if (y=z) {
+        int y = 77;
+    } else {
+        while (true) {
+            int z = -1;
+        }
+    }
+}
