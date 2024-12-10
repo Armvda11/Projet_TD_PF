@@ -1,0 +1,4 @@
+int f(int x=5) {
+    static int x = 0;
+    return x;
+}

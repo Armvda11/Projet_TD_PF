@@ -1,0 +1,3 @@
+int f(int x, int y=6, int z) {
+    return (x+y);
+}
