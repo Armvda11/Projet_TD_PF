@@ -14,6 +14,12 @@ let pathFichiersRat = "../../../../../tests/gestion_id/gloables/fichiersRat/"
 (*  TESTS *)
 (**********)
 
+try 
+    let _ = compiler (pathFichiersRat^"testAffectation2.rat") 
+    in raise ErreurNonDetectee
+  with
+  | IdentifiantNonDeclare("y") -> ()
+
 let%test_unit "testDeclaration1" = 
   let _ = compiler (pathFichiersRat^"testDeclaration1.rat") in ()
 
@@ -27,7 +33,29 @@ let%test_unit "testAcces2" =
   let _ = compiler (pathFichiersRat^"testAcces2.rat") in ()
 
 let%test_unit "testDoubleDecla1" = 
-  let _ = compiler (pathFichiersRat^"testDoubleDecla1.rat") in ()
+  try
+    let _ = compiler (pathFichiersRat^"testDoubleDecla1.rat")
+    in raise ErreurNonDetectee
+  with
+  | DoubleDeclaration("x") -> ()
 
 let%test_unit "testDoubleDecla2" = 
-  let _ = compiler (pathFichiersRat^"testDoubleDecla2.rat") in ()
+  try
+    let _ = compiler (pathFichiersRat^"testDoubleDecla2.rat")
+    in raise ErreurNonDetectee
+  with
+  | DoubleDeclaration("x") -> ()
+
+let%test_unit "testDoubleDecla3" = 
+  try
+      let _ = compiler (pathFichiersRat^"testDoubleDecla3.rat")
+      in raise ErreurNonDetectee
+    with
+    | DoubleDeclaration("x") -> ()
+
+let%test_unit "testDoubleDecla4" = 
+  try
+    let _ = compiler (pathFichiersRat^"testDoubleDecla4.rat")
+    in raise ErreurNonDetectee
+  with
+  | DoubleDeclaration("x") -> ()
