@@ -28,6 +28,7 @@ val print_programme : A.programme -> unit
 
 end
 
+
 (*Module d'affiche des AST issus de la phase d'analyse syntaxique *)
 module PrinterAstSyntax : PrinterAst with module A = AstSyntax =
 struct
@@ -56,6 +57,7 @@ struct
     | AppelFonction (n,le) -> "call "^n^"("^((List.fold_right (fun i tq -> (string_of_expression i)^tq) le ""))^") "
     (* | Ident n -> n^" " *)
     | Booleen b -> if b then "true " else "false "
+    | Affectable af -> (string_of_affectable af)^" "
     | Entier i -> (string_of_int i)^" "
     | Unaire (op,e1) -> (string_of_unaire op) ^ (string_of_expression e1)^" "
     | Binaire (b,e1,e2) ->
@@ -65,11 +67,16 @@ struct
           | _ -> (string_of_expression e1)^(string_of_binaire b)^(string_of_expression e2)^" "
         end
 
+  (* Conversion des affectables *)
+  and string_of_affectable af =
+    match af with
+    | Ident n -> n
+    | Deref af -> "*"^(string_of_affectable af)
   (* Conversion des instructions *)
   let rec string_of_instruction i =
     match i with
     | Declaration (t, n, e) -> "Declaration  : "^(string_of_type t)^" "^n^" = "^(string_of_expression e)^"\n"
-    | Affectation (n,e) ->  "Affectation  : "^n^" = "^(string_of_expression e)^"\n"
+    | Affectation (n,e) ->  "Affectation  : "^string_of_affectable n^" = "^(string_of_expression e)^"\n"
     | Constante (n,i) ->  "Constante  : "^n^" = "^(string_of_int i)^"\n"
     | Affichage e ->  "Affichage  : "^(string_of_expression e)^"\n"
     | Conditionnelle (c,t,e) ->  "Conditionnelle  : IF "^(string_of_expression c)^"\n"^
