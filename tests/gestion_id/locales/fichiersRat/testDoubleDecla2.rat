@@ -1,0 +1,7 @@
+static int x = 0;
+
+int f() {
+    static int y = 0;
+    static int x = 4;
+    return (x+y);
+}
