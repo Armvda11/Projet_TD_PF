@@ -1,0 +1,4 @@
+test {
+    rat r = [8/5];
+    rat* x = &r;
+}

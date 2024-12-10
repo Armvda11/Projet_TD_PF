@@ -1,0 +1,10 @@
+test {
+    int x = 0;
+    bool b = false;
+
+    if ((&b)=(&x)) {
+        print true;
+    } else {
+        print false;
+    }
+}

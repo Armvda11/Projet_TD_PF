@@ -1,0 +1,5 @@
+test {
+    rat* r = (new rat);
+    int x = num (*r);
+    int y = denom (*r);
+}

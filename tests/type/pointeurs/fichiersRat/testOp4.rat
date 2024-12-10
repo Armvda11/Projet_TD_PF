@@ -1,0 +1,7 @@
+test {
+    bool b = false;
+    rat r = [2/3];
+    bool* a = &b;
+    rat* c = &r;
+    print (a<c);
+}

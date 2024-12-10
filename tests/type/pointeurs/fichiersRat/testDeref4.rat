@@ -1,0 +1,8 @@
+test {
+    bool* b = (new bool);
+    if (*b) {
+        int x = 0;
+    } else {
+        int x = 0;
+    }
+}

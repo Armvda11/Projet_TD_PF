@@ -1,0 +1,6 @@
+test {
+    rat r = [6/5];
+    rat* a = &r;
+    rat* b = a;
+    print (a=b);
+}

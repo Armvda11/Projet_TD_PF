@@ -1,0 +1,4 @@
+test {
+    rat x = [0/4];
+    int* y = num x;
+}

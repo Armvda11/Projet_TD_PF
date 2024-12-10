@@ -1,0 +1,8 @@
+test {
+    int* x = null;
+    bool* y = null;
+    rat* z = null;
+    int** a = null;
+    bool** b = null;
+    rat** c = null;
+}
