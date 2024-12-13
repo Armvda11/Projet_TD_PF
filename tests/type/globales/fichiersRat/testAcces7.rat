@@ -1,0 +1,9 @@
+static int x = 2;
+static int y = 5;
+static bool b = true;
+
+test {
+    if (b = ((x+y)=7)) {
+        print (x*y);
+    }
+}

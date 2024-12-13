@@ -1,0 +1,8 @@
+static bool b = true;
+
+test {
+    bool b2 = b;
+    if(b2) {
+        int x = 0;
+    }
+}

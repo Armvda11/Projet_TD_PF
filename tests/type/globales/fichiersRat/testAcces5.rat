@@ -1,0 +1,5 @@
+static bool b = false;
+
+test {
+    int x = (0+b);
+}

@@ -1,0 +1,5 @@
+static rat x = 0;
+
+test {
+    print x;
+}

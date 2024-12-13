@@ -1,0 +1,9 @@
+static int x = 0;
+static bool y = false;
+static rat z = [5/9];
+
+test {
+    print x;
+    print y;
+    print z;
+}

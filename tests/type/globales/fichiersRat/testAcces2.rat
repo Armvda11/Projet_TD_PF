@@ -1,0 +1,9 @@
+static int x = 10;
+
+int f() {
+    return x;
+}
+
+test {
+    print f();
+}

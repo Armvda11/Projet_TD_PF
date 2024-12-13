@@ -1,0 +1,10 @@
+static rat r = [3/2];
+
+int f() {
+    return (num r);
+}
+
+test {
+    int x = (f()+(denom r));
+    print x;
+}

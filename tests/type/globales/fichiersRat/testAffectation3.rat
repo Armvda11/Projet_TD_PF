@@ -1,0 +1,5 @@
+static bool x = [1/2];
+
+test {
+    print x;
+}

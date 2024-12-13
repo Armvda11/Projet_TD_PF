@@ -1,0 +1,5 @@
+static rat r = [9/2];
+
+test {
+    bool b = num r;
+}
