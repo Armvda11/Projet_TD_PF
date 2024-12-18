@@ -1,14 +1,11 @@
 
 open Type
 open Tds
-
 open Ast
 open AstType
 open Exceptions
-
 type t1 = Ast.AstTds.programme
 type t2 = Ast.AstType.programme
-
 
 (* analyse_type_affectable : tds -> AstTds.affectable -> AstType.affectable *)
 (* Paramètre a : l'affectable à analyser *)
@@ -16,17 +13,22 @@ type t2 = Ast.AstType.programme
 (* Erreur si le type de l'affectable ne correspond pas au type attendu *)
 let rec analyse_type_affectable a =
   match a with
+  (* l'affectable est un identifiant *)
   | AstTds.Ident info -> 
+    (* Vérifier que l'identifiant est bien une variable ou une constante*)
     begin
       match !info with
       | InfoVar(_,t,_,_) -> (AstType.Ident info, t)
       | InfoConst(_,_) -> (AstType.Ident info, Int)
       | _ -> raise (MauvaiseUtilisationIdentifiant "variable")
     end
+  (* l'affectable est un pointeur *)
   | AstTds.Deref a -> 
     (* Vérifier que l'affectable est bien un pointeur *)
     (* Récupérer le type de l'affectable *)
-    let (na,ta) = analyse_type_affectable a in
+    let (na,ta) = analyse_type_affectable a in 
+    (* na pour la représentation de l'affectable dans l'AST de type *)
+    (* ta pour le type de l'affectable *)
     match ta with
     | Pointeur t -> (AstType.Deref na, t)
     | _ -> raise (TypeInattendu (ta, Pointeur Int))
@@ -43,9 +45,9 @@ let rec analyse_type_expression e =
       match !info with
       (* vérifie que l'identifiant est un fonction avec les type de retour et type des parametre *)
       | InfoFun(_,tr,tl) -> 
-        let nbase = List.map analyse_type_expression le in
-        let nle = List.map fst nbase in
-        let nlsg = List.map snd nbase in
+        let nbase = List.map analyse_type_expression le in 
+        let nle = List.map fst nbase in (* liste des expressions typées *)
+        let nlsg = List.map snd nbase in (* liste des types des expressions typées *)
         (* vérifie que les parametres sont compatibles avec les types attendus *)
         if est_compatible_list tl  nlsg then
           (AstType.AppelFonction (info, nle), tr)
@@ -85,9 +87,8 @@ let rec analyse_type_expression e =
        | Int,Inf,Int -> (Binaire(Inf,ne1,ne2),Bool)
        | _ -> raise(TypeBinaireInattendu(binaire,t1,t2))   
     end
-    
-    | AstTds.Null -> (AstType.Null,Pointeur(Undefined))
-    | AstTds.New t -> (AstType.New t,Pointeur t)
+    | AstTds.Null -> (AstType.Null,Pointeur(Undefined)) (* l'expression est null , on renvoie null *)
+    | AstTds.New t -> (AstType.New t,Pointeur t)  (* l'expression est un new , on renvoie le type de l'adresse *)
     (* l'expression est une adresse , on renvoie le type de l'adresse *)
     | AstTds.Adresse n ->  
     (* on vérifie que l'identifiant est une variable *)
@@ -97,7 +98,6 @@ let rec analyse_type_expression e =
           (AstType.Adresse n, Pointeur t)  (* On renvoie une paire : l'adresse de l'identifiant transformée pour l'AST de type et un pointeur vers le type `t` *)
       | _ -> raise (MauvaiseUtilisationIdentifiant "variable")  
     end
-
 
 (* analyse_type_instruction tds -> info_ast option -> AstTds.instruction -> AstType.instruction*)
 (* parametre i : l'instruction *)
@@ -127,7 +127,6 @@ let rec analyse_type_instruction i =
       AstType.Affectation(na,ne)
     else
       raise (TypeInattendu ( te,ta))
-      
   (* l'instruction est un affichage , on fait les affichages distints en fonction des types *)
  | AstTds.Affichage e -> 
     let (ne, te) = analyse_type_expression e in

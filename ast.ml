@@ -198,11 +198,16 @@ struct
 (* = expression de AstType  *)
 type expression = AstType.expression
 
+(* Affectable existant dans Rat *)
+(* = affectable de AstTds *)
+type affectable = AstType.affectable
+
+
 (* instructions existantes dans notre langage *)
 type bloc = instruction list * int (* taille du bloc *)
  and instruction =
  | Declaration of Tds.info_ast * expression
- | Affectation of Tds.info_ast * expression
+ | Affectation of affectable * expression
  | AffichageInt of expression
  | AffichageRat of expression
  | AffichageBool of expression

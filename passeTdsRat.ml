@@ -3,7 +3,6 @@
 open Tds
 open Exceptions
 open Ast
-
 type t1 = Ast.AstSyntax.programme
 type t2 = Ast.AstTds.programme
 
@@ -35,7 +34,6 @@ let rec analyse_tds_affectable tds af modifiable =
   (* L'affectable est un pointeur *)
   | AstSyntax.Deref n ->  AstTds.Deref (analyse_tds_affectable tds n false)  
 
-
 (* analyse_tds_expression : tds -> AstSyntax.expression -> AstTds.expression *)
 (* Paramètre tds : la table des symboles courante *)
 (* Paramètre e : l'expression à analyser *)
@@ -63,11 +61,12 @@ let rec analyse_tds_expression tds e = match e with
   | AstSyntax.Booleen(b) -> AstTds.Booleen(b)
   (* Les entiers ne changent pas entre l'AstSyntax et l'AstTds *)
   | AstSyntax.Entier(nb) -> AstTds.Entier(nb)
-
+  (* L'identifiant est un unaire *)
   | AstSyntax.Unaire(op, expr) -> 
     (* On récupère la nouvelle expression qui correspond à l'AstTds et on crée notre expression de type AstTds *)
     let expr_tds = analyse_tds_expression tds expr in
     AstTds.Unaire(op, expr_tds)
+  (* L'identifiant est un binaire *)
   | AstSyntax.Binaire(op, expr1, expr2) ->
     (* On récupère les deux nouvelles expressions qui correspondent à l'AstTds et on crée notre expression de type AstTds *)
     let nexpr1 = analyse_tds_expression tds expr1 in
@@ -233,10 +232,11 @@ let analyse_tds_fonction tds (AstSyntax.Fonction(t,n,lp,li))  =
       (* L'identifiant de la fonction n'a pas été trouvé dans la TDS globale, il est donc non déclaré *)
       (* On crée une nouvelle InfoFun pour la fonction et on l'ajoute à la TDS *)
       let info_func = InfoFun (n,t,[]) in
+      (* On crée une référence pour pouvoir modifier l'information de la fonction plus tard *)
       let info_func_ast = ref info_func in
-      ajouter tds n info_func_ast;
+      ajouter tds n info_func_ast; (* On ajoute la fonction à la TDS *)
 
-        (* On crée une nouvelle TDS fille pour les paramètres de la fonction *)
+      (* On crée une nouvelle TDS fille pour les paramètres de la fonction *)
       let paramtds = creerTDSFille tds in
 
        (* Fonction locale pour ajouter un paramètre à la TDS des paramètres *)
@@ -256,7 +256,7 @@ let analyse_tds_fonction tds (AstSyntax.Fonction(t,n,lp,li))  =
       (* On ajoute tous les paramètres à la TDS des paramètres *)
       let lpia = List.map ajouter_param lp in
 
-       (* On crée une nouvelle TDS petite-fille pour le bloc de la fonction *)
+    (* On crée une nouvelle TDS petite-fille pour le bloc de la fonction *)
       let bloctds = creerTDSFille paramtds in
      (* On analyse le bloc de la fonction avec la nouvelle TDS petite-fille *)
       let nbloc = analyse_tds_bloc bloctds (Some info_func_ast) li in
@@ -266,8 +266,6 @@ let analyse_tds_fonction tds (AstSyntax.Fonction(t,n,lp,li))  =
     | Some _ -> (* L'identifiant de la fonction est déjà déclaré globalement, on lève une exception *)
       raise (DoubleDeclaration n)
     
-
-
 (* analyser : AstSyntax.programme -> AstTds.programme *)
 (* Paramètre : le programme à analyser *)
 (* Vérifie la bonne utilisation des identifiants et tranforme le programme

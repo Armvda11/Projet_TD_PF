@@ -6,9 +6,18 @@ open String
 open Type
 open Code
 open Tam
-
 type t1 = Ast.AstPlacement.programme
 type t2 = string
+
+let rec analyse_code_affectable a =  match a with 
+| AstType.Ident info -> 
+  begin
+    match !info with
+      | InfoVar(_,t,dep, reg) -> load (getTaille t) dep reg
+      | _ -> failwith "problème analyse_code_affectable __ ident"
+  end
+
+
 
 (*AstPlacement.expression (AstType.expression) -> e -> string*)
 (*Paramètre e : expression à analyser*)
@@ -26,7 +35,7 @@ let rec analyse_code_expression e = match e with
      | _ -> failwith "problème analyse_code_expression __ appel_fonction"
     )
 (* l'expression est une variable *)
-  | AstType.Ident info ->
+  (* | AstType.Ident info ->
     begin
       (* on vérifie que l'information est bien une variable ou une constante *)
       match !info with
@@ -35,7 +44,7 @@ let rec analyse_code_expression e = match e with
         | InfoConst (_,v )-> 
             loadl_int v
         | _ ->failwith "problème analyse_code_expression __ appel_fonction"
-    end
+    end *)
   (* l'expression est un booléen *)
   | AstType.Booleen b -> loadl_int ( if b then 1 else 0 )
   (* l'expression est un entier *)
@@ -71,6 +80,18 @@ let rec analyse_code_expression e = match e with
       | _ -> failwith "Opérateur binaire non supporté dans analyse_code_expression"
     in 
     expr1 ^ expr2 ^ code_val
+  (* l'expression est un affectable *)
+  | AstType.Affectable a -> analyse_code_affectable a false
+  (* l'expression est un new *)
+  | AstType.New t ->( loadl_int  getTaille t )  ^ Tam.subr "MAlloc"
+  (* l'expression est une adresse *)
+  | AstType.Adresse i -> 
+    begin
+      (* on vérifie que l'information est bien une variable *)
+      match !i with
+        | InfoVar(_,_,dep, reg) -> loada dep reg
+        | _ -> failwith "problème analyse_code_expression __ adresse"
+    end
 
   
 (* AstPlacement.instruction -> string *)
