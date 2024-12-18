@@ -8,6 +8,10 @@ open AstPlacement
 type t1 = Ast.AstType.programme
 type t2 = Ast.AstPlacement.programme
 
+
+
+
+
 (* AstType.instruction -> int -> string -> AstPlacement.instruction * int *)
 (* instruction, dep, reg -> instruction * taille *)
 (* Paramètre instruction : l'instruction à analyser *)
@@ -20,6 +24,7 @@ let rec analyse_placement_instruction i dep reg = match i with
       match !info with
         (* L'identifiant est bien une variable *)
         | InfoVar(n,t,_,_) -> 
+          (* on modifie l'adresse de la variable *)
           let ninfo = InfoVar(n,t,dep,reg) in
             modifier_adresse_variable dep reg info;
           (Declaration(ref ninfo, e), getTaille t)
@@ -56,6 +61,13 @@ let rec analyse_placement_instruction i dep reg = match i with
   | AstType.AffichageBool e -> (AffichageBool(e),0)
   (* l'instruction est vide *)
   | AstType.Empty -> (Empty,0)
+  (* l'instruction est un affectable *)
+  (* | AstType.Affectable (a , e) -> (AstPlacement.Affectation(a,e),0)
+  (* l'instruction est un new *)
+  | AstType.New t -> (New t,0)
+  (* l'instruction est une adresse *)
+  | AstType.Adresse ia -> (Adresse ia,0) *)
+
 
 (* AstType.bloc -> int -> string -> AstPlacement.bloc * int *)
 (* bloc, dep, reg -> bloc * taille *)

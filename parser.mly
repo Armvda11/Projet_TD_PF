@@ -105,4 +105,6 @@ e :
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
 | PO exp=e PF             {exp}
 | a1 = af                  {Affectable a1} (* Affectable *)
-
+| NEW t1=typ                  {New t1}
+| NULL                    {Null}
+| ADRESSE n=ID                {Adresse n}

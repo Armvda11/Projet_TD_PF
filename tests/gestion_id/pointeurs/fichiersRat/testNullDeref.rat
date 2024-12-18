@@ -1,3 +1,4 @@
 test {
-    int x = (*null);
+    int y = null;
+    int x = (*y);
 }
