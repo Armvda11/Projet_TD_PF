@@ -7,6 +7,7 @@ sig
    type instruction
    type fonction
    type programme
+   type affectable
 end
 
 

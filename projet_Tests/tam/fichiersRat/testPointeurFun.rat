@@ -1,0 +1,17 @@
+int inc (rat * x, int y){
+  int * z = (new int);
+  *z = 0;
+  *z = (*z+1);
+  *x = [(((num *x) + 1) + y)/(*z + 2)];
+  return (*z+y);
+}
+
+test {
+  rat * x = (new rat);
+  *x = [5/1];
+  int a = inc(x, 2);
+  print a;
+  a = inc(x,3);
+  print a;
+  print *x;
+}

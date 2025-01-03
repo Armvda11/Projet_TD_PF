@@ -40,6 +40,8 @@ open Ast.AstSyntax
 %token ADRESSE
 %token NEW
 %token NULL
+(* static *)
+%token STATIC
 
 
 (* Type de l'attribut synthétisé des non-terminaux *)
@@ -48,7 +50,8 @@ open Ast.AstSyntax
 %type <fonction> fonc
 %type <instruction> i
 %type <typ> typ
-%type <typ*string> param
+// %type <defaut> d (* paramètre par défaut *)
+// %type <typ*string*(defaut option)> param (* paramètre *)
 %type <expression> e 
 %type <affectable>  af (* Affectable *)
 
@@ -58,7 +61,10 @@ open Ast.AstSyntax
 %start <Ast.AstSyntax.programme> main
 
 %%
+(* variable globale *)
+globale : STATIC t=typ n=ID EQUAL e1=e PV {Declaration (t,n,e1)}
 
+(*variable locale*)
 main : lfi=prog EOF     {lfi}
 
 prog : lf=fonc* ID li=bloc  {Programme (lf,li)}
@@ -69,6 +75,9 @@ param : t=typ n=ID  {(t,n)}
 
 bloc : AO li=i* AF      {li}
 
+(*parameètre par défaut*)
+d : EQUAL e1 = e   {Defaut e1}
+
 i :
 | t=typ n=ID EQUAL e1=e PV          {Declaration (t,n,e1)}
 // | n=ID EQUAL e1=e PV                {Affectation (n,e1)}
@@ -78,6 +87,8 @@ i :
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
 | n=af EQUAL e1=e PV                 {Affectation (n,e1)}
+// variable static dans une instruction 
+| STATIC t=typ n=ID EQUAL e1=e PV {Declaration (t,n,e1)}
 
 (* Affectable *)
 af :
@@ -104,7 +115,7 @@ e :
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
 | PO exp=e PF             {exp}
-| a1 = af                  {Affectable a1} (* Affectable *)
-| NEW t1=typ                  {New t1}
+| a1 = af                 {Affectable a1} (* Affectable *)
+| NEW t1=typ              {New t1}
 | NULL                    {Null}
-| ADRESSE n=ID                {Adresse n}
+| ADRESSE n=ID            {Adresse n}

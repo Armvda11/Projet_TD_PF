@@ -88,7 +88,7 @@ let rec analyse_type_expression e =
        | _ -> raise(TypeBinaireInattendu(binaire,t1,t2))   
     end
     | AstTds.Null -> (AstType.Null,Pointeur(Undefined)) (* l'expression est null , on renvoie null *)
-    | AstTds.New t -> (AstType.New t,Pointeur t)  (* l'expression est un new , on renvoie le type de l'adresse *)
+    | AstTds.New t -> (AstType.New(t),Pointeur t)  (* l'expression est un new , on renvoie le type de l'adresse *)
     (* l'expression est une adresse , on renvoie le type de l'adresse *)
     | AstTds.Adresse n ->  
     (* on vérifie que l'identifiant est une variable *)
@@ -118,15 +118,16 @@ let rec analyse_type_instruction i =
      else
        (raise (TypeInattendu ( te,t)))
   (* l'instruction est une affectation*)
-  | AstTds.Affectation(info, e) -> 
-    (* on analyse le type de l'expression *)
-    let (ne,te) = analyse_type_expression e in
-    (* on vérifie que le type de l'expression est compatible avec le type de l'affectable *)
-    let (na,ta) = analyse_type_affectable info in
-    if est_compatible ta  te then
-      AstType.Affectation(na,ne)
+   | AstTds.Affectation(info, e) -> 
+    let (ne, te) = analyse_type_expression e in
+    let (na, ta) = analyse_type_affectable info in
+    print_endline ("Type de l'affectable : " ^ (string_of_type ta)); 
+    print_endline ("Type de l'expression : " ^ (string_of_type te)); 
+    if est_compatible ta te then
+      AstType.Affectation(na, ne)
     else
-      raise (TypeInattendu ( te,ta))
+      raise (TypeInattendu (te, ta))
+  
   (* l'instruction est un affichage , on fait les affichages distints en fonction des types *)
  | AstTds.Affichage e -> 
     let (ne, te) = analyse_type_expression e in

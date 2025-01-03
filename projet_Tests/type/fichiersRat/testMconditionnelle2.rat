@@ -1,0 +1,12 @@
+rat* mult(int a, int b){
+    rat x = [0/1];
+    int* p= null;
+    while(p=true){
+        x=[3/4];
+    }
+    return (&x);
+}
+
+test{
+    rat* p= mult(1,2);
+}

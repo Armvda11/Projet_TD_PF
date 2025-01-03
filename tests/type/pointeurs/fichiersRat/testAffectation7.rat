@@ -3,4 +3,4 @@ test {
     int* y = &x;
     int* z = &y;
     z = true;
-}
+}   

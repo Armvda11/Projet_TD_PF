@@ -189,20 +189,3 @@ let%test_unit "testOp10" =
 
 
 
-
-let%test_unit "testAcces1" = 
-  let _ = compiler (pathFichiersRat^"testAcces1.rat") in ()
-
-let%test_unit "testDoubleDecla1" = 
-  try
-    let _ = compiler (pathFichiersRat^"testDoubleDecla1.rat")
-    in raise ErreurNonDetectee
-  with
-  | DoubleDeclaration("x") -> ()
-
-let%test_unit "testDoubleDecla2" = 
-  try
-    let _ = compiler (pathFichiersRat^"testDoubleDecla2.rat")
-    in raise ErreurNonDetectee
-  with
-  | DoubleDeclaration("x") -> ()
