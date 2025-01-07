@@ -1,5 +1,5 @@
 test {
     rat* x = null;
-    bool b = false;
-    x = &b;
+    bool* b = (new bool);
+    x = b;
 }

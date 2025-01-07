@@ -9,13 +9,43 @@ open Tam
 type t1 = Ast.AstPlacement.programme
 type t2 = string
 
-let rec analyse_code_affectable a =  match a with 
-| AstType.Ident info -> 
+let rec getType a =
+  match a with
+  | AstTds.Ident info -> 
+    begin
+      match !info with
+        | InfoVar(_,t,_,_) -> t
+        | InfoConst(_,_) -> Int
+        | _ -> failwith "problème getType ident"
+    end
+  | AstTds.Deref a -> 
+    let t = getType a in
+    begin
+    match t with
+      | Pointeur t2 -> 
+        t2
+      | _ -> failwith "problème getType deref"
+    end
+let rec analyse_code_affectable a write =  match a with 
+| AstTds.Ident info -> 
   begin
     match !info with
-      | InfoVar(_,t,dep, reg) -> load (getTaille t) dep reg
+      | InfoVar(_,t,dep, reg) ->  
+        if write then 
+          store (getTaille t) dep reg
+        else
+          load (getTaille t) dep reg
+      | InfoConst (_,v )-> 
+          loadl_int v
       | _ -> failwith "problème analyse_code_affectable __ ident"
   end
+  | AstTds.Deref p -> 
+    let taille = getTaille (getType p) in
+    let code = analyse_code_affectable p false in
+    if write then 
+      code ^ (storei taille)
+    else
+      code ^ (loadi taille)
 
 
 
@@ -34,17 +64,6 @@ let rec analyse_code_expression e = match e with
          all_le ^ call "SB" nom
      | _ -> failwith "problème analyse_code_expression __ appel_fonction"
     )
-(* l'expression est une variable *)
-  (* | AstType.Ident info ->
-    begin
-      (* on vérifie que l'information est bien une variable ou une constante *)
-      match !info with
-        | InfoVar(_,t,dep, reg) -> 
-            load (getTaille t) dep reg
-        | InfoConst (_,v )-> 
-            loadl_int v
-        | _ ->failwith "problème analyse_code_expression __ appel_fonction"
-    end *)
   (* l'expression est un booléen *)
   | AstType.Booleen b -> loadl_int ( if b then 1 else 0 )
   (* l'expression est un entier *)
@@ -83,7 +102,7 @@ let rec analyse_code_expression e = match e with
   (* l'expression est un affectable *)
   | AstType.Affectable a -> analyse_code_affectable a false
   (* l'expression est un new *)
-  | AstType.New t ->( loadl_int  getTaille t )  ^ Tam.subr "MAlloc"
+  | AstType.New t ->( loadl_int (getTaille t))  ^ (subr "MAlloc")
   (* l'expression est une adresse *)
   | AstType.Adresse i -> 
     begin
@@ -92,6 +111,7 @@ let rec analyse_code_expression e = match e with
         | InfoVar(_,_,dep, reg) -> loada dep reg
         | _ -> failwith "problème analyse_code_expression __ adresse"
     end
+  | AstType.Null -> ""
 
   
 (* AstPlacement.instruction -> string *)
@@ -104,17 +124,13 @@ let rec analyse_code_instruction i = match i with
     begin 
       (* on vérifie que l'information est bien une variable *)
       match !i with 
-      | InfoVar(_,t,dep,reg) -> (Tam.push (getTaille t)) ^ ( analyse_code_expression e) ^ (Tam.store (getTaille t) dep reg)
+      | InfoVar(_,t,dep,reg) -> (push (getTaille t)) ^ ( analyse_code_expression e) ^ (store (getTaille t) dep reg)
       | _ -> failwith" problème analyse_code_instruction __ déclaration "
     end
   (* l'instruction est une affectation *)
-  | Affectation (i,e) ->
-    begin
-      (* on vérifie que l'information est bien une variable *)
-      match !i with 
-      | InfoVar(_,t,dep,reg) -> (analyse_code_expression e) ^ (Tam.store (getTaille t) dep reg)
-      | _ -> failwith "problème analyse_code_instruction __  Affectation"
-    end
+  | Affectation (a,e) ->
+    let code = analyse_code_affectable a true in
+    analyse_code_expression e ^ code
   (* l'instruction est une constante *)
   | AffichageInt e -> (analyse_code_expression e ) ^ Tam.subr "IOut"
   (* l'instruction est un Rat*)
@@ -122,6 +138,9 @@ let rec analyse_code_instruction i = match i with
   (* l'instruction est un Bool *)
   | AffichageBool e -> (analyse_code_expression e) ^ Tam.subr "BOut"
   (* l'instruction est une conditionnelle *)
+  | AffichagePointeur (e,t) ->
+    analyse_code_expression e ^ (loadi (getTaille t)) ^ (subr "IOut")
+  | AffichageNull e -> analyse_code_expression e ^ (subr "IOut")
   | Conditionnelle (c,e1,e2) -> 
     (* on crée deux étiquettes pour les deux blocs *)
     let etiquetteE = label (getEtiquette()) in 

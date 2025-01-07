@@ -30,6 +30,8 @@ let rec analyse_placement_instruction i dep reg = match i with
           (Declaration(ref ninfo, e), getTaille t)
         | _ -> failwith "type non-attendu dans le placement instruction Declaration"
     end
+
+  | AstType.Affectation(ia,e) -> (Affectation(ia,e),0)
   (* l'instruction est une conditionnelle *)
   | AstType.Conditionnelle(c,t,e) ->
     (* analyse du premier et du second bloc*)
@@ -59,14 +61,9 @@ let rec analyse_placement_instruction i dep reg = match i with
   | AstType.AffichageRat e -> (AffichageRat(e),0)
   (* l'instruction est un affichage Bool *)
   | AstType.AffichageBool e -> (AffichageBool(e),0)
-  (* l'instruction est vide *)
-  | AstType.Empty -> (Empty,0)
-  (* l'instruction est un affectable *)
-  (* | AstType.Affectable (a , e) -> (AstPlacement.Affectation(a,e),0)
-  (* l'instruction est un new *)
-  | AstType.New t -> (New t,0)
-  (* l'instruction est une adresse *)
-  | AstType.Adresse ia -> (Adresse ia,0) *)
+  | AstType.AffichagePointeur (_, _) ->(AstPlacement.Empty, 0) (* (AstPlacement.AffichagePointeur (e, t), 0) *)
+  | AstType.AffichageNull _ -> (AstPlacement.Empty, 0) (*(AstPlacement.AffichageNull e, 0)*)
+  | AstType.Empty -> (AstPlacement.Empty, 0)
 
 
 (* AstType.bloc -> int -> string -> AstPlacement.bloc * int *)

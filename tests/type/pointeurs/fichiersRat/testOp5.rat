@@ -3,5 +3,5 @@ test {
     int x = 2;
     rat* a = &r;
     int* b = &x;
-    bool y = a*b;
+    bool y = (a<b);
 }

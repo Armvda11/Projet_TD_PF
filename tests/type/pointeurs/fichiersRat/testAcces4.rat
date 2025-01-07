@@ -1,4 +1,4 @@
 test {
     int x = 9;
-    bool** b = &(x);
+    bool** b = &x;
 }

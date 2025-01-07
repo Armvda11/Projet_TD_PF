@@ -18,8 +18,8 @@ let rec analyse_type_affectable a =
     (* Vérifier que l'identifiant est bien une variable ou une constante*)
     begin
       match !info with
-      | InfoVar(_,t,_,_) -> (AstType.Ident info, t)
-      | InfoConst(_,_) -> (AstType.Ident info, Int)
+      | InfoVar(_,t,_,_) -> (AstTds.Ident info, t)
+      | InfoConst(_,_) -> (AstTds.Ident info, Int)
       | _ -> raise (MauvaiseUtilisationIdentifiant "variable")
     end
   (* l'affectable est un pointeur *)
@@ -30,7 +30,7 @@ let rec analyse_type_affectable a =
     (* na pour la représentation de l'affectable dans l'AST de type *)
     (* ta pour le type de l'affectable *)
     match ta with
-    | Pointeur t -> (AstType.Deref na, t)
+    | Pointeur t -> (AstTds.Deref na, t)
     | _ -> raise (TypeInattendu (ta, Pointeur Int))
 
 (* analyse_tds_expression : tds -> AstTds.expression -> AstType.expression *)
@@ -87,7 +87,7 @@ let rec analyse_type_expression e =
        | Int,Inf,Int -> (Binaire(Inf,ne1,ne2),Bool)
        | _ -> raise(TypeBinaireInattendu(binaire,t1,t2))   
     end
-    | AstTds.Null -> (AstType.Null,Pointeur(Undefined)) (* l'expression est null , on renvoie null *)
+    | AstTds.Null -> (AstType.Null,Null) (* l'expression est null , on renvoie null *)
     | AstTds.New t -> (AstType.New(t),Pointeur t)  (* l'expression est un new , on renvoie le type de l'adresse *)
     (* l'expression est une adresse , on renvoie le type de l'adresse *)
     | AstTds.Adresse n ->  
@@ -112,17 +112,13 @@ let rec analyse_type_instruction i =
      let (ne,te) = analyse_type_expression e in
       (* on vérifie que le type de l'expression est compatible avec le type de la variable *)
      if est_compatible t  te then
-      (*on modifie le type de la variable dans la tds*)
-      (modifier_type_variable te info ;
-       AstType.Declaration(info,ne))
+       AstType.Declaration(info,ne)
      else
        (raise (TypeInattendu ( te,t)))
   (* l'instruction est une affectation*)
    | AstTds.Affectation(info, e) -> 
     let (ne, te) = analyse_type_expression e in
     let (na, ta) = analyse_type_affectable info in
-    print_endline ("Type de l'affectable : " ^ (string_of_type ta)); 
-    print_endline ("Type de l'expression : " ^ (string_of_type te)); 
     if est_compatible ta te then
       AstType.Affectation(na, ne)
     else
@@ -132,11 +128,12 @@ let rec analyse_type_instruction i =
  | AstTds.Affichage e -> 
     let (ne, te) = analyse_type_expression e in
     begin
-      match te with 
-      | Int -> AstType.AffichageInt ne
-      | Bool -> AstType.AffichageBool ne  
-      | Rat -> AstType.AffichageRat ne
-      | _ -> failwith "type error : type inconnu"
+    match te with
+    | Int -> AstType.AffichageInt ne
+    | Bool -> AstType.AffichageBool ne
+    | Rat -> AstType.AffichageRat ne
+    | Pointeur t -> AstType.AffichagePointeur(ne, t)
+    | _ -> failwith "Erreur interne Affichage"
     end
 
   (* l'instruction est une conditionnelle , on vérifie que le type de l'expression est un booléen *)

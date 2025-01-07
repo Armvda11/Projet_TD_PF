@@ -1,6 +1,5 @@
 test {
-    int x = 0;
-    int* y = &x;
-    int* u = null;
-    int* z = (y)*(u);
+    int* x = (new int);
+    int* p = (new int);
+    int result = (x+p);
 }
