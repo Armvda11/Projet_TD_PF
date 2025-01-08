@@ -194,9 +194,12 @@ let rec analyse_code_instruction i = match i with
 (* programme -> string *)
 (* paramètre Programme(fonctions , prog) : programme à analyser *)
 (* retour : le code TAM correspondant au programme *)
-  let analyser (Programme(fonctions , prog)) =
+  let analyser (Programme(vg,fonctions , prog)) =
+
+     (* je n'y arrive pas pour le code tam /// merde  *)
+    let code_variable_globale = analyse_code_bloc vg in
     (* on analyse des fonctions du programme  *)
     let code_fonction = List.map analyse_code_fonction fonctions in 
     (* on analyse le programme principal *)
     let code_prog = "MAIN\n" ^ analyse_code_bloc prog ^ Tam.halt in 
-    getEntete() ^ code_prog ^ (String.concat "" code_fonction)
+    getEntete() ^ code_prog ^ (String.concat "" code_fonction) ^ code_variable_globale

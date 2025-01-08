@@ -75,6 +75,7 @@ struct
   (* Conversion des instructions *)
   let rec string_of_instruction i =
     match i with
+    | DeclarationStatic (t,n, e) -> "DeclarationStatic : "^n^" : "^(string_of_type t)^" = "^(string_of_expression e)^"\n"
     | Declaration (t, n, e) -> "Declaration  : "^(string_of_type t)^" "^n^" = "^(string_of_expression e)^"\n"
     | Affectation (n,e) ->  "Affectation  : "^string_of_affectable n^" = "^(string_of_expression e)^"\n"
     | Constante (n,i) ->  "Constante  : "^n^" = "^(string_of_int i)^"\n"
@@ -90,10 +91,22 @@ struct
   let string_of_fonction (Fonction(t,n,lp,li)) = (string_of_type t)^" "^n^" ("^((List.fold_right (fun (t,n) tq -> (string_of_type t)^" "^n^" "^tq) lp ""))^") = \n"^
                                         ((List.fold_right (fun i tq -> (string_of_instruction i)^tq) li ""))^"\n"
 
+
+
   (* Conversion d'un programme Rat *)
-  let string_of_programme (Programme (fonctions, instruction)) =
-    (List.fold_right (fun f tq -> (string_of_fonction f)^tq) fonctions "")^
-    (List.fold_right (fun i tq -> (string_of_instruction i)^tq) instruction "")
+  let string_of_programme (Programme (variable_globale, fonctions, instruction)) =
+    (* Conversion des variables globales directement *)
+    let string_of_variable_globale_inline vg =
+      match vg with
+      | AstSyntax.DeclarationGlobale (t, n, e) ->
+          "Var : " ^ n ^ " : " ^ (string_of_type t) ^ " = " ^ (string_of_expression e) ^ "\n"
+    in
+
+    (List.fold_right (fun vg tq -> (string_of_variable_globale_inline vg) ^ tq) variable_globale "") ^
+    (List.fold_right (fun f tq -> (string_of_fonction f) ^ tq) fonctions "") ^
+    (List.fold_right (fun i tq -> (string_of_instruction i) ^ tq) instruction "")
+  
+
 
   (* Affichage d'un programme Rat *)
   let print_programme programme =

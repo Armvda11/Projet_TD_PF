@@ -5,3 +5,7 @@ int f() {
     static int x = 4;
     return (x+y);
 }
+
+test{
+  int x = 3;
+}

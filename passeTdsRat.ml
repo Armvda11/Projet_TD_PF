@@ -41,6 +41,7 @@ let rec analyse_tds_affectable tds af modifiable =
 en une expression de type AstTds.expression *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let rec analyse_tds_expression tds e = match e with
+
   (* L'identifiant est un appel de fontion *)
   | AstSyntax.AppelFonction(id, le) -> 
     begin
@@ -99,6 +100,15 @@ en une instruction de type AstTds.instruction *)
 (* Erreur si mauvaise utilisation des identifiants *)
 let rec analyse_tds_instruction tds oia i =
   match i with
+  (* !!!!!!!!!!!!!!!  Demander a declaration static nécessite de faire infoVarStatic  
+  Demander a BAPTISTE !
+  *)
+  | AstSyntax.DeclarationStatic (t, n, e) -> 
+    let ne = analyse_tds_expression tds e in
+      let info = InfoVarStatic( n,t, 0, "", false) in
+        let ia = info_to_info_ast info in
+          ajouter tds n ia;
+          AstTds.Declaration (t, ia, ne)
   | AstSyntax.Declaration (t, n, e) ->
       begin
         match chercherLocalement tds n with
@@ -128,28 +138,6 @@ let rec analyse_tds_instruction tds oia i =
       let naf = analyse_tds_affectable tds n true in
       let ne = analyse_tds_expression tds e in
       AstTds.Affectation (naf, ne)
-      (* begin
-        match chercherGlobalement tds n with
-        | None ->
-          (* L'identifiant n'est pas trouvé dans la tds globale. *)
-          raise (IdentifiantNonDeclare n)
-        | Some info ->
-          (* L'identifiant est trouvé dans la tds globale,
-          il a donc déjà été déclaré. L'information associée est récupérée. *)
-          begin
-            match info_ast_to_info info with
-            | InfoVar _ ->
-              (* Vérification de la bonne utilisation des identifiants dans l'expression *)
-              (* et obtention de l'expression transformée *)
-              let ne = analyse_tds_expression tds e in
-              (* Renvoie de la nouvelle affectation où le nom a été remplacé par l'information
-                 et l'expression remplacée par l'expression issue de l'analyse *)
-              AstTds.Affectation (info, ne)
-            |  _ ->
-              (* Modification d'une constante ou d'une fonction *)
-              raise (MauvaiseUtilisationIdentifiant n)
-          end
-      end *)
   | AstSyntax.Constante (n,v) ->
       begin
         match chercherLocalement tds n with
@@ -281,13 +269,26 @@ let analyse_tds_fonction tds (AstSyntax.Fonction(t,n,lp,li))  =
     | Some _ -> (* L'identifiant de la fonction est déjà déclaré globalement, on lève une exception *)
       raise (DoubleDeclaration n)
     
-(* analyser : AstSyntax.programme -> AstTds.programme *)
+
+
+let analyse_gestion_id_variable_globale tds (AstSyntax.DeclarationGlobale(t, n, e)) = 
+  match chercherLocalement tds n with
+  | None -> 
+    let ne = analyse_tds_expression tds e in
+    let info = InfoVar(n, t, 0, "") in
+    let ia = info_to_info_ast info in
+    ajouter tds n ia;
+    AstTds.Declaration(t, ia, ne)
+  | Some _ -> raise (DoubleDeclaration n)
+
+      (* analyser : AstSyntax.programme -> AstTds.programme *)
 (* Paramètre : le programme à analyser *)
 (* Vérifie la bonne utilisation des identifiants et tranforme le programme
 en un programme de type AstTds.programme *)
 (* Erreur si mauvaise utilisation des identifiants *)
-let analyser (AstSyntax.Programme (fonctions,prog)) =
+let analyser (AstSyntax.Programme (vg, fonctions,prog)) =
   let tds = creerTDSMere () in
+  let nvg = List.map (analyse_gestion_id_variable_globale tds) vg in
   let nf = List.map (analyse_tds_fonction tds) fonctions in
   let nb = analyse_tds_bloc tds None prog in
-  AstTds.Programme (nf,nb)
+  AstTds.Programme (nvg, nf, nb)

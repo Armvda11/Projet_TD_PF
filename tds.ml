@@ -5,6 +5,7 @@ open Type
 type info =
   | InfoConst of string * int
   | InfoVar of string * typ * int * string
+  | InfoVarStatic of string * typ * int * string *bool
   | InfoFun of string * typ * typ list
 
 (* Données stockées dans la tds  et dans les AST : pointeur sur une information *)

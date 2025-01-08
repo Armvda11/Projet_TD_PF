@@ -104,12 +104,14 @@ let analyse_placement_fonction (AstType.Fonction(info,lp,li)) =
   let _ = analyse_placement_params lp 0 in
   Fonction(info,lp,(nli,tvarloc))
 
+
 (* AstType.programme -> AstPlacement.programme *)
 (* programme -> programme *)
 (* Paramètre AstType.Programme(fonctions,prog) : programme à analyser *)
 (* retourne : programme *)
 (* Analyse le placement des variables locales et des paramètres *)
-let analyser (AstType.Programme(fonctions,prog)) =
+let analyser (AstType.Programme(vg,fonctions,prog)) =
+  let  nlg = analyse_placement_bloc vg 0 "SB" in
   let nlf = List.map analyse_placement_fonction fonctions in
   let nb = analyse_placement_bloc prog 0 "SB" in
-  Programme(nlf,nb)
+  Programme(nlg,nlf,nb)

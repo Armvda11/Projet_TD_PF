@@ -55,19 +55,20 @@ open Ast.AstSyntax
 %type <affectable>  af (* Affectable *)
 
 
-
-
 (* Type et définition de l'axiome *)
 %start <Ast.AstSyntax.programme> main
 
 %%
-(* variable globale *)
-globale : STATIC t=typ n=ID EQUAL e1=e PV {DeclarationGlobale (t,n,e1)}
+
 
 (*variable locale*)
 main : lfi=prog EOF     {lfi}
 
-prog : lf=fonc* ID li=bloc  {Programme (lf,li)}
+
+prog : lg=globale* lf=fonc* ID li=bloc  {Programme (lg,lf,li)}
+
+
+globale : STATIC t=typ n=ID EQUAL e1=e PV {DeclarationGlobale (t,n,e1)}
 
 fonc : t=typ n=ID PO lp=separated_list(VIRG,param) PF li=bloc {Fonction(t,n,lp,li)}
 

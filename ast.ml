@@ -30,11 +30,8 @@ type affectable =
 
 (* Expressions de Rat *)
 type expression =
-  (* Appel de fonction représe
-  nté par le nom de la fonction et la liste des paramètres réels *)
+  (* Appel de fonction représenté par le nom de la fonction et la liste des paramètres réels *)
   | AppelFonction of string * expression list
-  (* Accès à un identifiant représenté par son nom *)
-  (* | Ident of string *)
   (* Booléen *)
   | Booleen of bool
   (* Entier *)
@@ -76,9 +73,10 @@ and instruction =
 (* type de retour - nom - liste des paramètres (association type et nom) - corps de la fonction *)
 type fonction = Fonction of typ * string * (typ * string) list * bloc
 
+
 (* Structure d'un programme Rat *)
 (* liste de fonction - programme principal *)
-type programme = Programme of fonction list * bloc
+type programme = Programme of variable_globale list * fonction list * bloc
 
 end
 
@@ -98,7 +96,6 @@ struct
   remplacés par les informations associées aux identificateurs *)
   type expression =
     | AppelFonction of Tds.info_ast * expression list
-    (* | Ident of Tds.info_ast le nom de l'identifiant est remplacé par ses informations *)
     | Booleen of bool
     | Entier of int
     | Affectable of affectable
@@ -108,7 +105,7 @@ struct
     | New of typ
     | Adresse of Tds.info_ast
   
-  type variable_globale =  DeclarationGlobale of typ * Tds.info_ast * expression
+  type variable_globale =  DeclarationGlobale of Tds.info_ast * expression
 
   (* instructions existantes dans notre langage *)
   (* ~ instruction de l'AST syntaxique où les noms des identifiants ont été
@@ -116,8 +113,8 @@ struct
   + suppression de nœuds (const) *)
   type bloc = instruction list
   and instruction =
+    | DeclarationStatic of Tds.info_ast * expression
     | Declaration of typ * Tds.info_ast * expression (* le nom de l'identifiant est remplacé par ses informations *)
-    
     | Affectation of  affectable * expression (* le nom de l'identifiant est remplacé par ses informations *)
     | Affichage of expression
     | Conditionnelle of expression * bloc * bloc
@@ -133,7 +130,7 @@ struct
   type fonction = Fonction of typ * Tds.info_ast * (typ * Tds.info_ast ) list * bloc
 
   (* Structure d'un programme dans notre langage *)
-  type programme = Programme of fonction list * bloc
+  type programme = Programme of bloc * fonction list * bloc
 
 end
 
@@ -176,6 +173,7 @@ type variable_globale = DeclarationGlobale of Tds.info_ast * expression
 (* + résolution de la surcharge de l'affichage *)
 type bloc = instruction list
  and instruction =
+  | DeclarationStatic of Tds.info_ast * expression
   | Declaration of Tds.info_ast * expression
   | Affectation of affectable * expression
   | AffichageInt of expression
@@ -192,7 +190,7 @@ type bloc = instruction list
 type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc
 
 (* Structure d'un programme dans notre langage *)
-type programme = Programme of fonction list * bloc
+type programme = Programme of bloc * fonction list * bloc
 
 end
 
@@ -211,11 +209,12 @@ type expression = AstType.expression
 type affectable = AstType.affectable
 
 
-type variable_globale = DeclarationGlobale of Tds.info_ast * expression
+type variable_globale = AstType.variable_globale
 
 (* instructions existantes dans notre langage *)
 type bloc = instruction list * int (* taille du bloc *)
  and instruction =
+  | DeclarationStatic of Tds.info_ast * expression
  | Declaration of Tds.info_ast * expression
  | Affectation of AstTds.affectable * expression
  | AffichageInt of expression
@@ -233,6 +232,6 @@ type bloc = instruction list * int (* taille du bloc *)
 type fonction = Fonction of Tds.info_ast * Tds.info_ast list * bloc
 
 (* Structure d'un programme dans notre langage *)
-type programme = Programme of fonction list * bloc
+type programme = Programme of bloc * fonction list * bloc 
 
 end

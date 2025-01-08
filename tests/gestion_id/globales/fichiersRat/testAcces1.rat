@@ -1,5 +1,9 @@
 static int x = 0;
 
-test {
-    int y = (x+1);
+int f(){
+    int y = (x + 1);
+}
+
+test{
+  int x = 3;
 }
