@@ -43,7 +43,7 @@ struct
   type t1 = Ast.AstType.programme
   type t2 = Ast.AstPlacement.programme
 
-  let analyser _ = Ast.AstPlacement.Programme(([],0),[],([],0))
+  let analyser _ = Ast.AstPlacement.Programme(([],0),[],([],0),([],0))
 
 end
 
@@ -88,16 +88,17 @@ let analyser_param info =
 
   (* Renvoie la suite des adresses des variables déclarées dans la fonction *)
   (* Ainsi qu'une adresse d'identifiant si le retour est un identifiant *)
-  let analyser_fonction (Ast.AstPlacement.Fonction(info,lp,(li,_))) =
-    (*La liste des paramètres n'est plus présente, pour tester le placement des paramètres, on utilisera une astuce :
+  let analyser_fonction (Ast.AstPlacement.Fonction(info, lp, (li, _))) =
+    (* La liste des paramètres n'est plus présente, pour tester le placement des paramètres, on utilisera une astuce :
     il faudra écrire un programme qui renvoie le paramètre *)
     match info_ast_to_info info with
-    | InfoFun(n,_,_) -> [(n,(List.flatten (List.map analyser_param lp))@(List.flatten (List.map (analyser_instruction) li)))]
+    | InfoFun(n, _, _, _) ->  (* Modifié ici pour correspondre au constructeur InfoFun avec 4 arguments *)
+        [(n, (List.flatten (List.map analyser_param lp)) @(List.flatten (List.map analyser_instruction li)))]
     | _ -> failwith "Internal error"
-
+  
   (* Renvoie la suite des adresses des variables déclarées dans les fonctions et dans le programme principal *)
-  let analyser (Ast.AstPlacement.Programme ((lg,_), fonctions ,(prog,_))) =
-    ("main", List.flatten (List.map (analyser_instruction) prog))::(List.flatten (List.map (analyser_fonction) fonctions))@["main",List.flatten (List.map analyser_instruction lg)]
+  let analyser (Ast.AstPlacement.Programme ((lg,_), fonctions, (ls,_) ,(prog,_))) =
+    ("main", List.flatten (List.map (analyser_instruction) prog))::(List.flatten (List.map (analyser_fonction) fonctions))@["main",List.flatten (List.map analyser_instruction lg)]@["main",List.flatten (List.map analyser_instruction ls)]
 
 
 end

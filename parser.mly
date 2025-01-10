@@ -50,7 +50,9 @@ open Ast.AstSyntax
 %type <instruction list> bloc
 %type <fonction> fonc
 %type <instruction> i
+%type <default> d
 %type <typ> typ
+%type <typ * string * (default option)> param
 %type <expression> e 
 %type <affectable>  af (* Affectable *)
 
@@ -64,17 +66,20 @@ open Ast.AstSyntax
 (*variable locale*)
 main : lfi=prog EOF     {lfi}
 
-
 prog : lg=globale* lf=fonc* ID li=bloc  {Programme (lg,lf,li)}
-
 
 globale : STATIC t=typ n=ID EQUAL e1=e PV {DeclarationGlobale (t,n,e1)}
 
 fonc : t=typ n=ID PO lp=separated_list(VIRG,param) PF li=bloc {Fonction(t,n,lp,li)}
 
-param : t=typ n=ID  {(t,n)}
+d : EQUAL a=e {Default a}
+
+param : t=typ n=ID  defaut=option(d)    {(t,n,defaut)}
 
 bloc : AO li=i* AF      {li}
+
+
+
 
 
 

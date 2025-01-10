@@ -201,6 +201,12 @@ try
 with
 | TypeInattendu(Pointeur (Pointeur Rat), Pointeur(Pointeur Int)) -> ()
 
+let%test_unit "testMdeclaration5" = 
+try 
+  let _ = compiler (pathFichiersRat^"testMdeclaration5.rat")
+  in raise ErreurNonDetectee
+with
+| TypeInattendu(Null, Rat) -> ()
 
 let%test_unit "testMdeclaration6" = 
 try 
@@ -298,6 +304,19 @@ Tester les opérations invalides (e.g., déréférencer une valeur non pointeur)
 (*************)
 (*  GLOBALES *)
 (*************)
+
+let%test_unit "testVarglobal1"= 
+let _= compiler (pathFichiersRat^"testVarglobal1.rat") in ()
+
+let%test_unit "testVarglobal2" = 
+try 
+  let _ = compiler (pathFichiersRat^"testVarglobal2.rat")
+  in raise ErreurNonDetectee
+with
+| TypeInattendu(Int,  (Pointeur Rat)) -> ()
+
+let%test_unit "testVarglobal3"= 
+let _= compiler (pathFichiersRat^"testVarglobal3.rat") in ()
 
 (*
 S’assurer que le type des variables globales est correct et compatible avec leurs usages.

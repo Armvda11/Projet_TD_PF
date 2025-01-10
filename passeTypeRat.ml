@@ -39,6 +39,12 @@ let rec analyse_type_affectable a =
 (* Paramètre e : l'expression à analyser *)
 (* Vérifie le bon type type des expressions *)
 (* Erreur si le type de l'expression ne correspond pas au type attendu *)
+
+
+(* analyse_type_expression : tds -> AstTds.expression -> AstType.expression *)
+(* Paramètre e : l'expression à analyser *)
+(* Vérifie le bon type type des expressions *)
+(* Erreur si le type de l'expression ne correspond pas au type attendu *)
 let rec analyse_type_expression e =
    match e with
   (* l'identifiant est un appel de fonction *)
@@ -46,10 +52,11 @@ let rec analyse_type_expression e =
     begin
       match !info with
       (* vérifie que l'identifiant est un fonction avec les type de retour et type des parametre *)
-      | InfoFun(_,tr,tl) -> 
+      | InfoFun(_,tr,tl,_) -> 
         let nbase = List.map analyse_type_expression le in 
         let nle = List.map fst nbase in (* liste des expressions typées *)
         let nlsg = List.map snd nbase in (* liste des types des expressions typées *)
+       
         (* vérifie que les parametres sont compatibles avec les types attendus *)
         if est_compatible_list tl  nlsg then
           (AstType.AppelFonction (info, nle), tr)
@@ -116,21 +123,23 @@ let rec analyse_type_instruction i =
           AstType.DeclarationStatic(info, ne)
         else
           raise (Exceptions.TypeInattendu(te, t))
-    | _ -> failwith "erreur interne : déclaration statique d'une fonction" *)
+    | _ -> failwith "erreur interne : déclaration statique d'une fonction"  *)
 
-  | AstTds.DeclarationStatic (info, e) -> 
+  | AstTds.DeclarationStatic (t , info, e) -> 
     let (ne, te) = analyse_type_expression e in
-    if (est_compatible te Int) then
+    if (est_compatible te t) then
       AstType.DeclarationStatic(info, ne)
     else
-      raise (Exceptions.TypeInattendu(te, Int))
+      raise (Exceptions.TypeInattendu(te, t))
 
   (* l'instruction est une déclaration *)
   | AstTds.Declaration(t, info, e) ->
     (* on analyse le type de l'expression *)
      let (ne,te) = analyse_type_expression e in
+
       (* on vérifie que le type de l'expression est compatible avec le type de la variable *)
      if est_compatible t  te then
+
        AstType.Declaration(info,ne)
      else
        (raise (TypeInattendu ( te,t)))
@@ -176,7 +185,7 @@ let rec analyse_type_instruction i =
   | AstTds.Retour(e,info) ->
     let (ne,te) = analyse_type_expression e in
     match !info with
-    | InfoFun(_,t,_) -> 
+    | InfoFun(_,t,_,_) -> 
       if t = te then
         Retour(ne,info)
       else
@@ -211,7 +220,7 @@ let analyse_type_fonction (AstTds.Fonction(t, n, lp, li)) =
   let analyse_type_variable_globale (AstTds.DeclarationGlobale(info, e)) =
     let (ne, te) = analyse_type_expression e in
     match info_ast_to_info info with
-    | InfoFun (_, t, _) | InfoVar (_, t, _, _) ->
+    | InfoFun (_, t, _,_) | InfoVar (_, t, _, _) ->
         if est_compatible t te then
           AstType.DeclarationGlobale(info, ne)
         else

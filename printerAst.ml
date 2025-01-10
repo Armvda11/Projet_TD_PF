@@ -88,9 +88,17 @@ struct
     | Retour (e) -> "Retour  : RETURN "^(string_of_expression e)^"\n"
 
   (* Conversion des fonctions *)
-  let string_of_fonction (Fonction(t,n,lp,li)) = (string_of_type t)^" "^n^" ("^((List.fold_right (fun (t,n) tq -> (string_of_type t)^" "^n^" "^tq) lp ""))^") = \n"^
-                                        ((List.fold_right (fun i tq -> (string_of_instruction i)^tq) li ""))^"\n"
-
+  let string_of_fonction (Fonction(t, n, lp, li)) =
+    let params_to_string (t, n, def_opt) =
+      match def_opt with
+      | None -> (string_of_type t) ^ " " ^ n
+      | Some (Default e) -> (string_of_type t) ^ " " ^ n ^ " = " ^ (string_of_expression e)
+    in
+    let params_str = String.concat ", " (List.map params_to_string lp) in
+    let instructions_str = List.fold_right (fun i acc -> (string_of_instruction i) ^ acc) li "" in
+    (string_of_type t) ^ " " ^ n ^ " (" ^ params_str ^ ") = \n" ^ instructions_str ^ "\n"
+  
+  
 
 
   (* Conversion d'un programme Rat *)

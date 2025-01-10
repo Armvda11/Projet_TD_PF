@@ -43,19 +43,44 @@ en une expression de type AstTds.expression *)
 let rec analyse_tds_expression tds e = match e with
 
   (* L'identifiant est un appel de fontion *)
-  | AstSyntax.AppelFonction(id, le) -> 
+  | AstSyntax.AppelFonction(n, l) ->
     begin
-      match chercherGlobalement tds id with
-        | None -> (* L'identifiant n'a pas été trouvé dans la TDS globale, il est non déclaré *)
-          raise (IdentifiantNonDeclare id)
-        | Some info ->
-          (* Vérification si l'identifiant est utilisé correctement *)
-          (match !info with
-          | InfoFun _ -> (* L'identifiant est une fonction , on crée un appel de fonction dans l'AstTds *) 
-            AstTds.AppelFonction(info, (List.map (analyse_tds_expression tds) le))
-          | _ ->  (* L'identifiant n'est pas une fonction, mauvaise utilisation *)
-            raise (MauvaiseUtilisationIdentifiant id))
+      match chercherGlobalement tds n with
+        | None ->
+          (* L'identifiant n'est pas trouvé dans la TDS globale *)
+          raise (Exceptions.IdentifiantNonDeclare n)
+        | Some info_tds ->
+          begin
+            match info_ast_to_info info_tds with
+            | InfoFun(_, _, _, params) ->
+              (* Analyse des arguments passés *)
+              let analysed_args = List.map (analyse_tds_expression tds) l in
+
+              (* Compléter avec les paramètres par défaut *)
+              let rec completer_arguments params args =
+                match params, args with
+                | [], [] -> [] (* Aucun paramètre restant, aucun argument manquant *)
+                | Some (AstSyntax.Default(e)) :: rest_params, [] ->
+                    (* Paramètre avec valeur par défaut et argument manquant *)
+                    (analyse_tds_expression tds e) :: completer_arguments rest_params []
+                | None :: _, [] ->
+                    (* Paramètre obligatoire manquant *)
+                    raise (Exceptions.TypesParametresInattendus ([], []))
+                | _ :: rest_params, arg :: rest_args ->
+                    (* Argument fourni, continuer *)
+                    arg :: completer_arguments rest_params rest_args
+                | [], _ :: _ ->
+                    (* Trop d'arguments fournis *)
+                    raise (Exceptions.TypesParametresInattendus ([], []))
+              in
+
+              let final_args = completer_arguments params analysed_args in
+              AstTds.AppelFonction(info_tds, final_args)
+
+            | _ -> raise (MauvaiseUtilisationIdentifiant n)
+          end
     end
+
   (* L'identifiant est un affectable *)
   | AstSyntax.Affectable(af) -> AstTds.Affectable(analyse_tds_affectable tds af false)
   (* Les booleens ne changent pas entre l'AstSyntax et l'AstTds *)
@@ -108,7 +133,7 @@ let rec analyse_tds_instruction tds oia i =
       let info = InfoVarStatic( n,t, 0, "", false) in
         let ia = info_to_info_ast info in
           ajouter tds n ia;
-          AstTds.Declaration (t, ia, ne)
+          AstTds.DeclarationStatic (t, ia, ne)
   | AstSyntax.Declaration (t, n, e) ->
       begin
         match chercherLocalement tds n with
@@ -228,47 +253,42 @@ let analyse_variable_globale tds (AstSyntax.DeclarationGlobale(t,n,e)) =
 (* Vérifie la bonne utilisation des identifiants et tranforme la fonction
 en une fonction de type AstTds.fonction *)
 (* Erreur si mauvaise utilisation des identifiants *)
-
-let analyse_tds_fonction tds (AstSyntax.Fonction(t,n,lp,li))  =
+let analyse_tds_fonction tds (AstSyntax.Fonction(t, n, lp, li)) =
   match chercherGlobalement tds n with
-    | None -> 
-      (* L'identifiant de la fonction n'a pas été trouvé dans la TDS globale, il est donc non déclaré *)
-      (* On crée une nouvelle InfoFun pour la fonction et on l'ajoute à la TDS *)
-      let info_func = InfoFun (n,t,[]) in
-      (* On crée une référence pour pouvoir modifier l'information de la fonction plus tard *)
+  | None ->
+      (* Création de l'information de la fonction avec les valeurs par défaut des paramètres *)
+      let defauts = List.map (fun (_, _, def_opt) -> def_opt) lp in
+      let info_func = InfoFun (n, t, [], defauts) in  (* Le quatrième argument est la liste des valeurs par défaut *)
       let info_func_ast = ref info_func in
-      ajouter tds n info_func_ast; (* On ajoute la fonction à la TDS *)
+      ajouter tds n info_func_ast;
 
-      (* On crée une nouvelle TDS fille pour les paramètres de la fonction *)
+      (* Création de la TDS pour les paramètres *)
       let paramtds = creerTDSFille tds in
 
-       (* Fonction locale pour ajouter un paramètre à la TDS des paramètres *)
-      let ajouter_param (t,n) =
-        begin
-         (* On vérifie si le paramètre est déjà déclaré localement *)
+      (* Fonction locale pour ajouter un paramètre à la TDS *)
+      let ajouter_param (t, n, def_opt) =
         match chercherLocalement paramtds n with
         | None ->
-          (* Le paramètre n'est pas déclaré, on l'ajoute à la TDS des paramètres *)
-            let info = InfoVar (n,t,0,"") in
+            let info = InfoVar (n, t, 0, "") in
             let ia = ref info in
             ajouter paramtds n ia;
-            (t,ia)
+            (t, ia, def_opt) (* Inclure la valeur par défaut dans le tuple *)
         | Some _ -> raise (DoubleDeclaration n)
-        end
       in
-      (* On ajoute tous les paramètres à la TDS des paramètres *)
+
+      (* Analyse des paramètres avec gestion des valeurs par défaut *)
       let lpia = List.map ajouter_param lp in
 
-    (* On crée une nouvelle TDS petite-fille pour le bloc de la fonction *)
+      (* Création de la TDS pour le corps de la fonction *)
       let bloctds = creerTDSFille paramtds in
-     (* On analyse le bloc de la fonction avec la nouvelle TDS petite-fille *)
       let nbloc = analyse_tds_bloc bloctds (Some info_func_ast) li in
-      (* On retourne la fonction transformée en type AstTds.fonction *)
-      AstTds.Fonction (t,info_func_ast, lpia, nbloc)
-    
-    | Some _ -> (* L'identifiant de la fonction est déjà déclaré globalement, on lève une exception *)
-      raise (DoubleDeclaration n)
-    
+
+      (* Retourne la fonction transformée avec l'AST TDS *)
+      AstTds.Fonction(t, info_func_ast, List.map (fun (t, ia, _) -> (t, ia)) lpia, nbloc)
+
+  | Some _ -> raise (DoubleDeclaration n)
+
+
 
 
 let analyse_gestion_id_variable_globale tds (AstSyntax.DeclarationGlobale(t, n, e)) = 
