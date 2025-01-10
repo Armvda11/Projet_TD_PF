@@ -4,3 +4,7 @@ int f() {
     int x = (y*2);
     return x;
 }
+
+test{
+  int x = 3;
+}

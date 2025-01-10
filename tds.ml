@@ -5,7 +5,9 @@ open Type
 type info =
   | InfoConst of string * int
   | InfoVar of string * typ * int * string
-  | InfoFun of string * typ * typ list
+  | InfoVarStatic of string * typ * int * string *bool
+  (* ajoute des paramère par défaut  *)
+  | InfoFun of string * typ * typ list * (AstSyntaxPres.default option) list
 
 (* Données stockées dans la tds  et dans les AST : pointeur sur une information *)
 type info_ast = info ref  
@@ -285,7 +287,7 @@ let string_of_info info =
   match info with
   | InfoConst (n,value) -> "Constante "^n^" : "^(string_of_int value)
   | InfoVar (n,t,dep,base) -> "Variable "^n^" : "^(string_of_type t)^" "^(string_of_int dep)^"["^base^"]"
-  | InfoFun (n,t,tp) -> "Fonction "^n^" : "^(List.fold_right (fun elt tq -> if tq = "" then (string_of_type elt) else (string_of_type elt)^" * "^tq) tp "" )^
+  | InfoFun (n,t,tp,_) -> "Fonction "^n^" : "^(List.fold_right (fun elt tq -> if tq = "" then (string_of_type elt) else (string_of_type elt)^" * "^tq) tp "" )^
                       " -> "^(string_of_type t)
 
 (* Affiche la tds locale *)
@@ -321,15 +323,15 @@ let%test _ =
 (* Modifie les types de retour et des paramètres si c'est une InfoFun, ne fait rien sinon *)
 let modifier_type_fonction t tp i =
        match !i with
-       | InfoFun(n,_,_) -> i:= InfoFun(n,t,tp)
+       | InfoFun(n,_,_,_) -> i:= InfoFun(n,t,tp,[])
        | _ -> failwith "Appel modifier_type_fonction pas sur un InfoFun"
 
 let%test _ = 
-  let info = InfoFun ("f", Undefined, []) in
+  let info = InfoFun ("f", Undefined, [],[]) in
   let ia = info_to_info_ast info in
   modifier_type_fonction Rat [Int ; Int] ia;
   match info_ast_to_info ia with
-  | InfoFun ("f", Rat, [Int ; Int]) -> true
+  | InfoFun ("f", Rat, [Int ; Int],[]) -> true
   | _ -> false
  
 (* Modifie l'emplacement (dépl, registre) si c'est une InfoVar, ne fait rien sinon *)
@@ -338,6 +340,15 @@ let%test _ =
      |InfoVar (n,t,_,_) -> i:= InfoVar (n,t,d,b)
      | _ -> failwith "Appel modifier_adresse_variable pas sur un InfoVar"
 
+
+let info_fun ia = match (info_ast_to_info ia) with
+  | InfoFun(nom, t, tp, lp) -> (nom, t, tp, lp)
+  | _ -> failwith "Mauvaise utilisation de la fonction pour récupérer les infos fun"
+
+(* Récupère  directement le quadruplet d'information d'un InfoVar ou d'un InfoFun*)
+let info_var ia = match (info_ast_to_info ia) with
+  | InfoVar(nom, t, d, reg) -> (nom, t, d, reg)
+  | _ -> failwith "Mauvaise utilisation de la fonction pour récupérer les infos var"
 let%test _ = 
   let info = InfoVar ("x", Rat, 4 , "SB") in
   let ia = info_to_info_ast info in

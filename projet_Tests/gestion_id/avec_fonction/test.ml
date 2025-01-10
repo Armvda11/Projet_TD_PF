@@ -17,6 +17,7 @@ let pathFichiersRat = "../../../../../projet_Tests/gestion_id/avec_fonction/fich
 (*************)
 (* POINTEURS *)
 (*************)
+
 let%test_unit "testBdeclaF"= 
   let _ = compiler (pathFichiersRat^"testBdeclaF.rat") in ()
 
@@ -101,7 +102,11 @@ with
 (*************)
 (*  GLOBALES *)
 (*************)
+let%test_unit "testVarglobal1" = 
+  let _ = compiler (pathFichiersRat^"testVarglobal1.rat") in ()
 
+let%test_unit "testVarglobal2" = 
+  let _ = compiler (pathFichiersRat^"testVarglobal2.rat") in ()
 
 (*************)
 (*  LOCALES  *)

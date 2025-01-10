@@ -75,6 +75,7 @@ struct
   (* Conversion des instructions *)
   let rec string_of_instruction i =
     match i with
+    | DeclarationStatic (t,n, e) -> "DeclarationStatic : "^n^" : "^(string_of_type t)^" = "^(string_of_expression e)^"\n"
     | Declaration (t, n, e) -> "Declaration  : "^(string_of_type t)^" "^n^" = "^(string_of_expression e)^"\n"
     | Affectation (n,e) ->  "Affectation  : "^string_of_affectable n^" = "^(string_of_expression e)^"\n"
     | Constante (n,i) ->  "Constante  : "^n^" = "^(string_of_int i)^"\n"
@@ -87,13 +88,33 @@ struct
     | Retour (e) -> "Retour  : RETURN "^(string_of_expression e)^"\n"
 
   (* Conversion des fonctions *)
-  let string_of_fonction (Fonction(t,n,lp,li)) = (string_of_type t)^" "^n^" ("^((List.fold_right (fun (t,n) tq -> (string_of_type t)^" "^n^" "^tq) lp ""))^") = \n"^
-                                        ((List.fold_right (fun i tq -> (string_of_instruction i)^tq) li ""))^"\n"
+  let string_of_fonction (Fonction(t, n, lp, li)) =
+    let params_to_string (t, n, def_opt) =
+      match def_opt with
+      | None -> (string_of_type t) ^ " " ^ n
+      | Some (Default e) -> (string_of_type t) ^ " " ^ n ^ " = " ^ (string_of_expression e)
+    in
+    let params_str = String.concat ", " (List.map params_to_string lp) in
+    let instructions_str = List.fold_right (fun i acc -> (string_of_instruction i) ^ acc) li "" in
+    (string_of_type t) ^ " " ^ n ^ " (" ^ params_str ^ ") = \n" ^ instructions_str ^ "\n"
+  
+  
+
 
   (* Conversion d'un programme Rat *)
-  let string_of_programme (Programme (fonctions, instruction)) =
-    (List.fold_right (fun f tq -> (string_of_fonction f)^tq) fonctions "")^
-    (List.fold_right (fun i tq -> (string_of_instruction i)^tq) instruction "")
+  let string_of_programme (Programme (variable_globale, fonctions, instruction)) =
+    (* Conversion des variables globales directement *)
+    let string_of_variable_globale_inline vg =
+      match vg with
+      | AstSyntax.DeclarationGlobale (t, n, e) ->
+          "Var : " ^ n ^ " : " ^ (string_of_type t) ^ " = " ^ (string_of_expression e) ^ "\n"
+    in
+
+    (List.fold_right (fun vg tq -> (string_of_variable_globale_inline vg) ^ tq) variable_globale "") ^
+    (List.fold_right (fun f tq -> (string_of_fonction f) ^ tq) fonctions "") ^
+    (List.fold_right (fun i tq -> (string_of_instruction i) ^ tq) instruction "")
+  
+
 
   (* Affichage d'un programme Rat *)
   let print_programme programme =
