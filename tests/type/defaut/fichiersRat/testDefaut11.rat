@@ -1,0 +1,14 @@
+static bool b = true;
+
+int f(bool a, int e  = b) { 
+   if (a ) {
+    return e;
+   } else {
+    return 1;
+   }
+
+}
+
+test {
+    print f(true); 
+}

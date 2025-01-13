@@ -1,0 +1,8 @@
+int f(int a) {
+    static bool flag = a; // Erreur : on ne peut pas affecter un int à un bool
+    return flag ;
+}
+
+test {
+    print f(5); // Erreur de typage
+}

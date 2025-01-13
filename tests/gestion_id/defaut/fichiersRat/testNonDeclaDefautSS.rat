@@ -1,0 +1,8 @@
+int j(int a, int b, int e = (b + a)) { 
+   return e;
+}
+
+test {
+    print j(3, 9, 12);
+
+}

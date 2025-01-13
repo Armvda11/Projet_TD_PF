@@ -2,8 +2,9 @@ static int x = 0;
 
 int f(){
     int y = (x + 1);
+    return y ;
 }
 
 test{
-  int x = 3;
+  int x = f();
 }

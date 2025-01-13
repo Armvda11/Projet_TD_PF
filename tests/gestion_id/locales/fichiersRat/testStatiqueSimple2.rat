@@ -1,0 +1,8 @@
+int f() {
+    static rat r = [3/4];
+    return num r;
+}
+
+test {
+    print f(); // 3
+}

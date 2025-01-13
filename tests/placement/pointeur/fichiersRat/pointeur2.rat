@@ -1,0 +1,7 @@
+main {
+    int x = 7;
+    int ** l = null;
+    int * p = (new int);
+    p = &x;
+    l = &p;
+}

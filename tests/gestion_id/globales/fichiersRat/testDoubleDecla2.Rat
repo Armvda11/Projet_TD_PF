@@ -1,12 +1,6 @@
-static int y = 0;
-static int z = 18;
-
+static  int x = 100;
+static  int* x  = null; // erreur de double déclaration 
 test {
-    if (y=z) {
-        int y = 77;
-    } else {
-        while (true) {
-            int z = -1;
-        }
-    }
+   
+    x = 50; 
 }

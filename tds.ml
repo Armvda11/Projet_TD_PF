@@ -5,7 +5,7 @@ open Type
 type info =
   | InfoConst of string * int
   | InfoVar of string * typ * int * string
-  | InfoVarStatic of string * typ * int * string *bool
+ 
   (* ajoute des paramère par défaut  *)
   | InfoFun of string * typ * typ list * (AstSyntaxPres.default option) list
 
@@ -339,8 +339,6 @@ let%test _ =
      match !i with
      |InfoVar (n,t,_,_) -> i:= InfoVar (n,t,d,b)
      | _ -> failwith "Appel modifier_adresse_variable pas sur un InfoVar"
-
-
 
 let%test _ = 
   let info = InfoVar ("x", Rat, 4 , "SB") in

@@ -1,0 +1,7 @@
+int f(int a, bool b = false) { // OK : b est de type bool
+    return (a + b);
+}
+
+test {
+    print f(3); // 3 + false = 3
+}

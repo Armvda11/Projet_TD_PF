@@ -1,9 +1,0 @@
-int f() {
-    int static x = 0;
-    int y = (9*x);
-    return y;
-}
-
-test{
-  int x = 3;
-}

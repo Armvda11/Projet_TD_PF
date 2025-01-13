@@ -1,4 +1,7 @@
-int f(int x=5) {
-    static int x = 0;
-    return x;
+int j(int a ,int b ,rat e = [5/3], bool e  = true ) { 
+   return e;
+}
+
+test {
+    print j(3,6);
 }

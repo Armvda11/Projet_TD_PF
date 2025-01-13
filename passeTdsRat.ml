@@ -136,8 +136,8 @@ let rec analyse_tds_instruction tds oia i =
   match i with
   | AstSyntax.DeclarationStatic (t, n, e) -> 
     let ne = analyse_tds_expression tds e in
-      let info = InfoVarStatic( n,t, 0, "", false) in
-        let ia = info_to_info_ast info in
+      let info = InfoVar( n,t, 0, "") in
+        let ia = ref info in
           ajouter tds n ia;
           AstTds.DeclarationStatic (t, ia, ne)
   | AstSyntax.Declaration (t, n, e) ->
@@ -296,7 +296,10 @@ let analyse_tds_fonction tds (AstSyntax.Fonction(t, n, lp, li)) =
 
 
 
-
+(* analyse_gestion_id_variable_globale : tds -> AstSyntax.declaration_globale -> AstTds.declaration_globale *)
+(* Paramètre tds : la table des symboles courante *)
+(* Paramètre : la déclaration globale à analyser *)
+(* Vérifie la bonne utilisation des identifiants et tranforme la déclaration *)
 let analyse_gestion_id_variable_globale tds (AstSyntax.DeclarationGlobale(t, n, e)) = 
   match chercherLocalement tds n with
   | None -> 

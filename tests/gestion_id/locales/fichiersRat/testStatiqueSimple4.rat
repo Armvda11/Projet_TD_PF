@@ -1,0 +1,14 @@
+int f() {
+    static bool flag = true;
+    if (flag) {
+        flag = false;
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+test {
+    print f(); // 1
+    print f(); // 0
+}

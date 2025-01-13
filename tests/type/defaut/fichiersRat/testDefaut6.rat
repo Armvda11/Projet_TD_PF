@@ -1,0 +1,8 @@
+int f(bool a, rat b = true) { // Erreur : a.num n'existe pas
+
+    return denom b; 
+}
+
+test {
+    print f(true); // Erreur de typage
+}

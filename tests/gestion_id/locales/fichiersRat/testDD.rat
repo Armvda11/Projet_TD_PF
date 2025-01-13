@@ -1,0 +1,10 @@
+int f() {
+    static int x = 3;
+    static int x = 5; // Erreur : double déclaration
+    return x;
+}
+
+test {
+     static int x = 5; 
+    print f();
+}

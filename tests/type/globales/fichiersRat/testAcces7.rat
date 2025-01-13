@@ -2,8 +2,15 @@ static int x = 2;
 static int y = 5;
 static bool b = true;
 
-test {
-    if (b = ((x+y)=7)) {
-        print (x*y);
-    }
+test{
+    int z =0;
+  if (b){
+    x = 4;
+    y = 6;
+
+  } else {
+    x = 6;
+  } 
+
+  print (x + y);
 }

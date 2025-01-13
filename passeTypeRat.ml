@@ -127,10 +127,8 @@ let rec analyse_type_instruction i =
   | AstTds.Declaration(t, info, e) ->
     (* on analyse le type de l'expression *)
      let (ne,te) = analyse_type_expression e in
-
       (* on vérifie que le type de l'expression est compatible avec le type de la variable *)
      if est_compatible t  te then
-
        AstType.Declaration(info,ne)
      else
        (raise (TypeInattendu ( te,t)))

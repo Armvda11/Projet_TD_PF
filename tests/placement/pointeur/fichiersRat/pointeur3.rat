@@ -1,0 +1,15 @@
+int mult(int* x, rat* y, bool z) {
+    int temp = num(*y);
+    if (z) {
+        return ((*x) * temp);
+    } else {
+        return ((*x) + temp);
+    }
+}
+
+main {
+    rat r = [5/6];
+    int a = 4;
+    bool flag = true;
+    int result = mult(&a, &r, flag);
+}

@@ -1,0 +1,10 @@
+int f() {
+    static int x = 3;
+    static rat r = [2/5];
+    x = num r; // Erreur : on ne peut pas affecter un rat.num (int) à un int
+    return x;
+}
+
+test {
+    print f(); // Erreur de typage
+}

@@ -1,10 +1,6 @@
-static int x = 0;
+static bool x  = false;
+static rat x = [5/9];
 
-int f() {
-    int x = 2;
-    return 0;
-}
-
-test{
-    int x = 4;
+test {
+    int y = x ;
 }

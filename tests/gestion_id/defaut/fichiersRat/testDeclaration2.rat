@@ -1,3 +1,9 @@
-int f(int x, int y=6, int z) {
-    return (x+y);
+int multiply(int a, int b = 2, int c = 3) {
+    return ((a * b )*c);
+}
+
+test {
+    print multiply(2);        // Résultat attendu : 12 (2 * 2 * 3)
+    print multiply(2, 4);     // Résultat attendu : 24 (2 * 4 * 3)
+    print multiply(2, 4, 5);  // Résultat attendu : 40 (2 * 4 * 5)
 }

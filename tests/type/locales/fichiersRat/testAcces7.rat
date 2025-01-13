@@ -1,0 +1,10 @@
+int f() {
+    static rat r = [2/3];
+    static int x = 3;
+    r = [((num r) + x)/ (denom r)];
+    return num r;
+}
+
+test {
+    print f(); 
+}

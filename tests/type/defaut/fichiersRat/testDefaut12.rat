@@ -1,0 +1,7 @@
+int f(rat a, int b = false) { 
+    return (num a + b );
+}
+
+test {
+    print f([1/3]); // Erreur de typage
+}

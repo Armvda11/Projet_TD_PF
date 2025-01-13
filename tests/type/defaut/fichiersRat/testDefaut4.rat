@@ -1,0 +1,7 @@
+rat f(int a, rat b = 5) { 
+    return [(a + num b)/ denom b];
+}
+
+test {
+    rat r = f(1);
+}

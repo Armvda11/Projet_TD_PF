@@ -1,5 +1,7 @@
-static int x = 0;
+int j(int a, bool b = true , bool* b = null) { // Erreur : type incompatible pour `b`
+   return (b * a );
+}
 
-int f(int x=4) {
-    return x;
+test {
+    print j(3);
 }

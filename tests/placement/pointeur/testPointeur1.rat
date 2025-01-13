@@ -1,7 +1,0 @@
-main {
-    int x = 3;
-    int * p = (new int);
-    int ** p2 = null;
-    p = &x;
-    p2 = &p;
-}

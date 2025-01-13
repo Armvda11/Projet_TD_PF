@@ -1,5 +1,7 @@
-static int x = 5;
+static int x = 10;
+static int x = 20; // Devrait lever une erreur
 
-test {
-    int x = 0;
+
+test{
+    int x =0 ;
 }

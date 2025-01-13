@@ -1,0 +1,14 @@
+static int b = 1;
+
+int f(bool a, int e  =  (b +1)) { 
+   if (a ) {
+    return e;
+   } else {
+    return 1;
+   }
+
+}
+
+test {
+    print f(true); 
+}

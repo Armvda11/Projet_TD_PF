@@ -1,0 +1,14 @@
+int add(int a, bool b = true) {
+    if (b) {
+          return a ;
+    } else {
+        b = false;
+        return a;
+    }
+  
+
+}
+
+test {
+    print add(3); 
+}

@@ -1,0 +1,15 @@
+int f() {
+    static int a = 0;
+    if (a = 0) {
+        a = 5;
+    } else {
+        a =( a + 10);
+    }
+    return a;
+}
+
+test {
+    print f(); // 5
+    print f(); // 15
+    print f(); // 25
+}

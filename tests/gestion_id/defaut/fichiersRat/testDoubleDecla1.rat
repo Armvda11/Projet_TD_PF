@@ -1,4 +1,8 @@
-int f(int a=3) {
-    int a = 4;
-    return a;
+int invalid_default(int a, int b = 5, int b =2) { // Erreur : `x` non résoluble comme valeur par défaut
+    return (a + b);
+}
+
+test {
+    int x = 10;
+    print invalid_default(5);
 }

@@ -1,0 +1,8 @@
+int f() {
+    static int x = 3;
+    return x;
+}
+
+test {
+    print f(); // 3
+}

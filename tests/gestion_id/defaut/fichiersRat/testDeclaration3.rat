@@ -1,0 +1,8 @@
+bool check(bool flag, bool result = false) { 
+    return result;
+}
+
+test {
+    print check(true);
+    print check(false, true); 
+}

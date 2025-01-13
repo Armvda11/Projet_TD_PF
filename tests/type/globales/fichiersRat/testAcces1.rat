@@ -1,8 +1,10 @@
 static bool b = true;
 
-test {
-    bool b2 = b;
-    if(b2) {
-        int x = 0;
-    }
+test{
+  int x = 3;
+  if (b){
+    x = 4;
+  } else {
+    x = 6;
+  } 
 }

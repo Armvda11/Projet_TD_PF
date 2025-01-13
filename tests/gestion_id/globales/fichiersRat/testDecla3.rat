@@ -1,0 +1,12 @@
+static int compteur = 0;
+
+int f() {
+    int c = compteur;
+    return (c +1);
+}
+
+test {
+   
+    int x = f();
+    int y = compteur;
+}
