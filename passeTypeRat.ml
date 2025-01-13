@@ -115,15 +115,6 @@ let rec analyse_type_instruction i =
   match i with
   (* l'instruction est empty , on renvoie empty *)
   | AstTds.Empty -> AstType.Empty
-  (* | AstTds.DeclarationStatic(info, e) -> 
-    let (ne, te) = analyse_type_expression e in
-    match info_ast_to_info info with
-    | InfoVarStatic(_, t, _, _,_) ->
-        if est_compatible t te then
-          AstType.DeclarationStatic(info, ne)
-        else
-          raise (Exceptions.TypeInattendu(te, t))
-    | _ -> failwith "erreur interne : déclaration statique d'une fonction"  *)
 
   | AstTds.DeclarationStatic (t , info, e) -> 
     let (ne, te) = analyse_type_expression e in

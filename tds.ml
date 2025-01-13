@@ -341,14 +341,7 @@ let%test _ =
      | _ -> failwith "Appel modifier_adresse_variable pas sur un InfoVar"
 
 
-let info_fun ia = match (info_ast_to_info ia) with
-  | InfoFun(nom, t, tp, lp) -> (nom, t, tp, lp)
-  | _ -> failwith "Mauvaise utilisation de la fonction pour récupérer les infos fun"
 
-(* Récupère  directement le quadruplet d'information d'un InfoVar ou d'un InfoFun*)
-let info_var ia = match (info_ast_to_info ia) with
-  | InfoVar(nom, t, d, reg) -> (nom, t, d, reg)
-  | _ -> failwith "Mauvaise utilisation de la fonction pour récupérer les infos var"
 let%test _ = 
   let info = InfoVar ("x", Rat, 4 , "SB") in
   let ia = info_to_info_ast info in

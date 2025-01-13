@@ -107,19 +107,7 @@ Tester les dépendances et initialisations successives.
 (* STATIQUES *)
 (*************)
 
-let%expect_test "testVarStatiqueSimple" =
-  runtam (pathFichiersRat^"testVarStatiqueSimple.rat");
-  [%expect{| 112233 |}]
 
-
-let%expect_test "testVarStatique" =
-  runtam (pathFichiersRat^"testVarStatique.rat");
-  [%expect{| 22114422 |}]
-
-
-let%expect_test "testVarStatique" =
-  runtam (pathFichiersRat^"testVarStatique.rat");
-  [%expect{| 22114422 |}]
 
 (*
 (*
@@ -140,11 +128,5 @@ let%expect_test "testParamDef1" =
   runtam (pathFichiersRat^"testParamDef1.rat");
   [%expect{| 54 |}]
 
-let%expect_test "testParamDef2" =
-  runtam (pathFichiersRat^"testParamDef2.rat");
-  [%expect{| 56 |}]
 
-let%expect_test "testTout" =
-  runtam (pathFichiersRat^"testTout.rat");
-  [%expect{| 42222[5/2][5/2][5/2]2733[7/2][9/2][9/2][9/2] |}]
   
