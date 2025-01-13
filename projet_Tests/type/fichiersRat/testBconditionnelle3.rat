@@ -1,0 +1,10 @@
+test{
+    bool a = true;
+    bool* e= &a;
+    bool * * t= &e;
+    if( * * t){
+        int x=2;
+    }else{
+        int x=3;
+    }
+}

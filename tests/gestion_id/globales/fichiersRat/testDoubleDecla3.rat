@@ -4,3 +4,7 @@ int f() {
     int x = 2;
     return 0;
 }
+
+test{
+    int x = 4;
+}

@@ -1,4 +1,4 @@
 test {
     int x = 7;
-    const y = &x;
+    int y = &x;
 }

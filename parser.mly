@@ -37,21 +37,24 @@ open Ast.AstSyntax
 %token INF
 %token EOF
 (* pointeur *)
-%token ADRESSE
 %token NEW
 %token NULL
+%token REF
+(* static *)
+%token STATIC
 
 
 (* Type de l'attribut synthétisé des non-terminaux *)
 %type <programme> prog
+%type <variable_globale> globale
 %type <instruction list> bloc
 %type <fonction> fonc
 %type <instruction> i
+%type <default> d
 %type <typ> typ
-%type <typ*string> param
+%type <typ * string * (default option)> param
 %type <expression> e 
 %type <affectable>  af (* Affectable *)
-
 
 
 (* Type et définition de l'axiome *)
@@ -59,41 +62,54 @@ open Ast.AstSyntax
 
 %%
 
+
+(*variable locale*)
 main : lfi=prog EOF     {lfi}
 
-prog : lf=fonc* ID li=bloc  {Programme (lf,li)}
+prog : lg=globale* lf=fonc* ID li=bloc  {Programme (lg,lf,li)}
+
+globale : STATIC t=typ n=ID EQUAL e1=e PV {DeclarationGlobale (t,n,e1)}
 
 fonc : t=typ n=ID PO lp=separated_list(VIRG,param) PF li=bloc {Fonction(t,n,lp,li)}
 
-param : t=typ n=ID  {(t,n)}
+d : EQUAL a=e {Default a}
+
+param : t=typ n=ID  defaut=option(d)    {(t,n,defaut)}
 
 bloc : AO li=i* AF      {li}
 
+
+
+
+
+
+(* Affectable *)
+af :
+| MULT af=af              {Deref af}
+| n=ID                         {Ident n} (* Identifiant  affectable *)
+
 i :
 | t=typ n=ID EQUAL e1=e PV          {Declaration (t,n,e1)}
-// | n=ID EQUAL e1=e PV                {Affectation (n,e1)}
+| n=af EQUAL e1=e PV                 {Affectation (n,e1)}
 | CONST n=ID EQUAL e=ENTIER PV      {Constante (n,e)}
 | PRINT e1=e PV                     {Affichage (e1)}
 | IF exp=e li1=bloc ELSE li2=bloc   {Conditionnelle (exp,li1,li2)}
 | WHILE exp=e li=bloc               {TantQue (exp,li)}
 | RETURN exp=e PV                   {Retour (exp)}
-| n=af EQUAL e1=e PV                 {Affectation (n,e1)}
+// variable static dans une instruction 
+| STATIC t=typ n=ID EQUAL e1=e PV {DeclarationStatic (t,n,e1)}
 
-(* Affectable *)
-af :
-| n = ID                         {Ident n} (* Identifiant  affectable *)
-| PO MULT n = af PF               {Deref n}
 
 typ :
+| t=typ MULT {Pointeur t}  (* Pointeur sur un type *) 
 | BOOL    {Bool}
 | INT     {Int}
 | RAT     {Rat}
-| t = typ MULT {Pointeur t}  (* Pointeur sur un type *) 
 
 e : 
+| a1=af                 {Affectable a1} (* Affectable *)
 | n=ID PO lp=separated_list(VIRG,e) PF   {AppelFonction (n,lp)}
 | CO e1=e SLASH e2=e CF   {Binaire(Fraction,e1,e2)}
-// | n=ID                    {Ident n}
 | TRUE                    {Booleen true}
 | FALSE                   {Booleen false}
 | e=ENTIER                {Entier e}
@@ -103,8 +119,7 @@ e :
 | PO e1=e MULT e2=e PF    {Binaire (Mult,e1,e2)}
 | PO e1=e EQUAL e2=e PF   {Binaire (Equ,e1,e2)}
 | PO e1=e INF e2=e PF     {Binaire (Inf,e1,e2)}
+| PO NEW t1=typ PF        {New t1}
 | PO exp=e PF             {exp}
-| a1 = af                  {Affectable a1} (* Affectable *)
-| NEW t1=typ                  {New t1}
+| REF n=ID                {Adresse n}
 | NULL                    {Null}
-| ADRESSE n=ID                {Adresse n}

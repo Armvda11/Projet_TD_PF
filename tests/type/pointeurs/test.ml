@@ -14,7 +14,14 @@ let pathFichiersRat = "../../../../../tests/type/pointeurs/fichiersRat/"
 (*  TESTS *)
 (**********)
 
-let%test_unit "testAffectation1" = 
+let%test_unit "testNull3" = 
+  try
+    let _ = compiler (pathFichiersRat^"testNull3.rat")
+    in raise ErreurNonDetectee
+  with
+  | TypeInattendu(Pointeur(Bool),Pointeur(Rat)) -> ()
+
+  let%test_unit "testAffectation1" = 
   let _ = compiler (pathFichiersRat^"testAffectation1.rat") in ()
 
 let%test_unit "testAffectation2" = 
@@ -53,20 +60,13 @@ let%test_unit "testAffectation7" =
     let _ = compiler (pathFichiersRat^"testAffectation7.rat")
     in raise ErreurNonDetectee
   with
-  | TypeInattendu(Bool,Pointeur(Int)) -> ()
+  | TypeInattendu(Pointeur(Pointeur(Int)),Pointeur(Int)) -> ()
 
 let%test_unit "testNull1" = 
   let _ = compiler (pathFichiersRat^"testNull1.rat") in ()
 
 let%test_unit "testNull2" = 
   let _ = compiler (pathFichiersRat^"testNull2.rat") in ()
-
-let%test_unit "testNull3" = 
-  try
-    let _ = compiler (pathFichiersRat^"testNull3.rat")
-    in raise ErreurNonDetectee
-  with
-  | TypeInattendu(Pointeur(Bool),Pointeur(Rat)) -> ()
 
 let%test_unit "testDeref1" = 
   let _ = compiler (pathFichiersRat^"testDeref1.rat") in ()
@@ -164,7 +164,7 @@ let%test_unit "testOp8" =
     let _ = compiler (pathFichiersRat^"testOp8.rat")
     in raise ErreurNonDetectee
   with
-  | TypeBinaireInattendu(_,Pointeur(Int),Undefined) -> ()
+  | TypeBinaireInattendu(_,Pointeur(Int),Pointeur(Int)) -> ()
 
 let%test_unit "testOp9" = 
   let _ = compiler (pathFichiersRat^"testOp9.rat") in ()
@@ -189,20 +189,3 @@ let%test_unit "testOp10" =
 
 
 
-
-let%test_unit "testAcces1" = 
-  let _ = compiler (pathFichiersRat^"testAcces1.rat") in ()
-
-let%test_unit "testDoubleDecla1" = 
-  try
-    let _ = compiler (pathFichiersRat^"testDoubleDecla1.rat")
-    in raise ErreurNonDetectee
-  with
-  | DoubleDeclaration("x") -> ()
-
-let%test_unit "testDoubleDecla2" = 
-  try
-    let _ = compiler (pathFichiersRat^"testDoubleDecla2.rat")
-    in raise ErreurNonDetectee
-  with
-  | DoubleDeclaration("x") -> ()

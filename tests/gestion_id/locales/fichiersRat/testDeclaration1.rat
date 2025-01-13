@@ -1,4 +1,3 @@
-int f() {
+test {
     static int x = 0;
-    return x;
 }

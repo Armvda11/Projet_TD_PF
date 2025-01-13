@@ -1,2 +1,6 @@
 static bool z = true;
 static rat y = [9/3];
+
+test{
+  int x = 3;
+}

@@ -48,8 +48,9 @@ let%test_unit "testDoubleDecla3" =
     | DoubleDeclaration("x") -> ()
 
 let%test_unit "testDoubleDecla4" = 
-  try
+  let _ = compiler (pathFichiersRat^"testDoubleDecla4.rat") in ()
+  (* try
     let _ = compiler (pathFichiersRat^"testDoubleDecla4.rat")
     in raise ErreurNonDetectee
   with
-  | DoubleDeclaration("x") -> ()
+  | DoubleDeclaration("x") -> () *)

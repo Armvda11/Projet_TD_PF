@@ -7,8 +7,10 @@ type info =
   (* Information associée à une variable : son nom (non indispensable mais aide au test et debbugage),
   son type, et son adresse ie son déplacement (int) par rapport à un registre (string) *)
   | InfoVar of string * typ * int * string
+  
+  | InfoVarStatic of string * typ * int * string *bool
   (* Information associée à une fonction : son nom (utile pour l'appel), son type de retour et la liste des types des paramètres *)
-  | InfoFun of string * typ * typ list
+  | InfoFun of string * typ * typ list *(AstSyntaxPres.default option) list
 
 (* Table des symboles *)
 type tds 
@@ -53,6 +55,13 @@ val info_to_info_ast : info -> info_ast
 (* Récupère l'information associée à un noeud *)
 val info_ast_to_info : info_ast -> info
 
+val info_fun : info_ast -> string * typ * typ list * AstSyntaxPres.default option list
+
+(* Récupère  directement le triplet d'information d'un InfoConst *)
+
+
+(* Récupère  directement le quadruplet d'information d'un InfoVar *)
+val info_var : info_ast -> string * typ * int * string
 (* Modifie le type si c'est une InfoVar, ne fait rien sinon *)
 val modifier_type_variable : typ -> info_ast -> unit
 

@@ -1,0 +1,11 @@
+bool* egalite(int a, int b){
+    bool r= true;
+    return (&r);
+}
+
+test{
+    bool e = true;
+    bool* r= (new bool);
+    bool** re=&r;
+    re=egalite(3,4);
+}

@@ -1,4 +1,5 @@
 test {
     rat r = [8/5];
-    bool* b = &(num r);
+    int x = num r;
+    bool* b = &x;
 }

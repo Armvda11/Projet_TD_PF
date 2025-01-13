@@ -29,8 +29,9 @@
         "true",    TRUE;
         "false",   FALSE;
         "return",  RETURN;
-        "new",     NEW;
-        "null",    NULL;
+        "new", NEW;
+        "null", NULL;
+        "static", STATIC
       ];
     fun id ->
       match Hashtbl.find_opt kws id with
@@ -40,7 +41,8 @@
 
 rule token = parse
   (* ignore les sauts de lignes mais les compte quand même *)
-| '\n'         { new_line lexbuf; token lexbuf }
+| '\n' ? '\r'         { new_line lexbuf; token lexbuf }
+| '\n'                { new_line lexbuf; token lexbuf }
   (* ignore les espaces et tabulations *)
 | [' ' '\t']   { token lexbuf }
   (* ignore les commentaires *)
@@ -60,10 +62,7 @@ rule token = parse
 | "+"          { PLUS }
 | "*"          { MULT }
 | "<"          { INF }
-| "&"          { ADRESSE }
-
-
-(* mots-clefs *)
+| "&"          { REF }
 
 (* constantes entières *)
 | ("-")?['0'-'9']+ as i
