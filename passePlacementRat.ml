@@ -176,7 +176,7 @@ let analyse_placement_fonction (AstType.Fonction(info, lp, li)) deplSB =
 (* Analyse le placement des fonctions. *)
 (* Renvoie la liste des fonctions et la liste des instructions des variables statiques avec sa taille totale *)
 
-let analyse_placement_fonctions lf deplSB =
+let analyse_fonctions lf deplSB =
   (* On défini une fonction auxiliaire pour prendre en compte le décalage dans le registre SB*)
   let rec aux lst depl =
   match lst with
@@ -197,13 +197,13 @@ let analyse_placement_fonctions lf deplSB =
 let analyser (AstType.Programme (vg, fonctions, prog)) =
   (* Définir une fonction pour l'analyse du programme *)
   let analyser_programme vg fonctions prog =
-    (* Étape 1 : Traiter les variables globales dans SB *)
+    (* Traiter les variables globales dans SB *)
     let (nvg, globales) = analyse_placement_bloc vg 0 "SB" in
-    (* Étape 2 : Traiter les fonctions en fonction des variables globales analysées *)
-    let (nlf, (li_static, taille_static)) = analyse_placement_fonctions fonctions globales in
-    (* Étape 3 : Calculer le déplacement de SB après les variables statiques et globales *)
+    (* Traiter les fonctions en fonction des variables globales analysées *)
+    let (nlf, (li_static, taille_static)) = analyse_fonctions fonctions globales in
+    (* Calculer le déplacement de SB après les variables statiques et globales *)
     let deplSB = taille_static + globales in
-    (* Étape 4 : Traiter le bloc principal avec le déplacement actuel de SB *)
+    (*  Traiter le bloc principal avec le déplacement actuel de SB *)
     let bloc_main = analyse_placement_bloc prog deplSB "SB" in
     (* Retourner le programme complet *)
     (nvg, globales), nlf, (li_static, deplSB), bloc_main
