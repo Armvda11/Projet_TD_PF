@@ -9,9 +9,6 @@ type t1 = Ast.AstType.programme
 type t2 = Ast.AstPlacement.programme
 
 
-
-
-
 (* AstType.instruction -> int -> string -> AstPlacement.instruction * int *)
 (* instruction, dep, reg -> instruction * taille *)
 (* Paramètre instruction : l'instruction à analyser *)
@@ -84,9 +81,7 @@ and  analyse_placement_bloc li dep reg = match li with
 
 
 
-
-
-
+  
 (* analyse_placement_bloc_fonction : AstType.instruction list -> int -> int -> (AstPlacement.instruction list * int) * int *)
 (* Paramètre li : la liste d'instructions à analyser *)
 (* Paramètre deplLB : le déplacement actuel dans le registres LB *)
@@ -98,94 +93,81 @@ and  analyse_placement_bloc li dep reg = match li with
 let rec analyse_placement_bloc_fonction li deplLB deplSB =
   match li with
   | h::q ->
-    let ((i, tailleLB), tailleSB) = 
-      match h with
-      | AstType.DeclarationStatic (info, e) ->
-        let (_, t, _, _) = 
-          match (info_ast_to_info info) with
-          | InfoVar(nom, t, d, reg) -> (nom, t, d, reg)
-        in
-        let taille = getTaille t in
-        modifier_adresse_variable deplSB "SB" info;
-        ((AstPlacement.DeclarationStatic(info, e), 0), taille)
-      | _ -> (analyse_placement_instruction h deplLB "LB", 0)
+    (* Analyse l'instruction courante directement dans cette fonction *)
+    let ((instr, tailleLB), tailleSB) = 
+      (match h with
+       | AstType.DeclarationStatic (info, e) ->
+         (* Traitement spécial pour les variables statiques locales *)
+         let (_, t, _, _) = (match (info_ast_to_info info) with
+         | InfoVar(nom, t, d, reg) -> (nom, t, d, reg)
+         | _ -> failwith "Mauvaise utilisation de la fonction pour récupérer les infos var" )in
+         let taille = getTaille t in
+         modifier_adresse_variable deplSB "SB" info;
+         ((AstPlacement.DeclarationStatic(info, e), 0), taille)
+       | _ ->
+         (* Traitement standard pour les autres instructions *)
+         (analyse_placement_instruction h deplLB "LB", 0))
     in
-    (* On traite les instructions suivantes pour récupérer la liste des résultats des suivantes *)
-    let ((listeInstructions, tailleBlocActuelleLB), tailleBlocActuelleSB) =
+    (* Analyse récursive des instructions suivantes *)
+    let ((instructionsSuivantes, tailleBlocActuelleLB), tailleBlocActuelleSB) =
       analyse_placement_bloc_fonction q (deplLB + tailleLB) (deplSB + tailleSB)
     in
-    (* On renvoie la mise à jour des variables : listes des instructions et les tailles dans les registres LB et SB *)
-    ((i::listeInstructions, tailleLB + tailleBlocActuelleLB), tailleSB + tailleBlocActuelleSB)
-  (* Cas final, on a traité toutes les instructions *)
+    (* Combine les résultats *)
+    ((instr::instructionsSuivantes, tailleLB + tailleBlocActuelleLB), tailleSB + tailleBlocActuelleSB)
   | [] -> ([], 0), 0
 
-(* traiter_parametres_fonction : int -> info_ast list -> unit *)
-(* Paramètre li : la liste d'instructions à trier *)
-(* Traite la liste des infos des paramètres d'une fonction *)
-(* Les fonctions partagent toutes le registre LB, le placement dépend *)
-(* donc uniquement des instructions de la fonction elle-même. *)
-let rec traiter_parametres_fonction tailleActuelleParam lst =
-  (
-  match lst with
-  (* S'il n'y a aucun paramètre, on ne fait rien *)
-  | [] -> ()
-  | h::q ->
-    begin
-      match (info_ast_to_info h) with
-      | InfoVar(_, t, _, _) -> let nouvelleTailleParam = (tailleActuelleParam - (getTaille t)) in
-      (* On met à jour l'info du paramètre pour le placer dans LB *)
-      modifier_adresse_variable nouvelleTailleParam "LB" h;
-      (* On traite les paramètres suivants *)
-      traiter_parametres_fonction nouvelleTailleParam q;
-      | _ -> failwith ("Erreur interne paramètres fonction")
-    end
-  )
 
 
 
 (* analyse_placement_fonction : AstType.fonction -> int -> AstPlacement.fonction * (AstPlacement.instruction list * int) *)
 (* Paramètre info : l'info_ast de la fonction analysée *)
-(* Paramètre lp : la liste des info_ast des paramètes de la fonction *)
+(* Paramètre lp : la liste des info_ast des paramètres de la fonction *)
 (* Paramètre li : le bloc des instructions de la fonction *)
 (* Analyse le placement d'une fonction. *)
 (* Renvoie la fonction et la liste des instructions des variables statiques avec leur taille *)
-
-let analyse_placement_fonction (AstType.Fonction(info,lp, li )) deplSB =
-  let rec separer_declaration_static li =
-    match li with
-    | h::q ->
-      let (lstFun, lstStatic) = separer_declaration_static q in
-      begin
-        match h with
-          | AstPlacement.DeclarationStatic _ -> (lstFun, h::lstStatic)
-          | _ -> (h::lstFun, lstStatic)
-      end
-    | [] -> ([],[])
-  in
+let analyse_placement_fonction (AstType.Fonction(info, lp, li)) deplSB =
+  (* Analyse le placement des paramètres et du bloc d'instructions de la fonction *)
   match (info_ast_to_info info) with
-  | InfoFun(_, _, _,_) ->
-    let rec analyse_parametres tailleActuelleParam lst =
-      match lst with
-      (* S'il n'y a aucun paramètre, on ne fait rien *)
-      | [] -> ()
-      | h::q ->
-        begin
-          match (info_ast_to_info h) with
-          | InfoVar(_, t, _, _) -> 
-            let nouvelleTailleParam = (tailleActuelleParam - (getTaille t)) in
-            (* On met à jour l'info du paramètre pour le placer dans LB *)
-            modifier_adresse_variable nouvelleTailleParam "LB" h;
-            (* On traite les paramètres suivants *)
-            analyse_parametres nouvelleTailleParam q;
-          | _ -> failwith ("Erreur interne paramètres fonction")
-        end
+  (* Cas d'une fonction *)
+  | InfoFun(_, _, _, _) ->
+    (* Traitement des paramètres de la fonction intégré directement dans l'analyse de la fonction *)
+    let analyser_parametres tailleActuelleParam lst =
+      (* Analyse des paramètres de la fonction *)
+      let _ = List.fold_left (fun tailleActuelle h ->
+        match (info_ast_to_info h) with
+        | InfoVar(_, t, _, _) ->
+            let nouvelleTailleParam = tailleActuelle - (getTaille t) in
+            modifier_adresse_variable nouvelleTailleParam "LB" h; (* Mise à jour des adresses *)
+            nouvelleTailleParam (* Retourner la nouvelle taille de paramètre *)
+        | _ -> failwith "Erreur interne paramètres fonction"
+      ) tailleActuelleParam lst in
+      ()
+    
     in
-    analyse_parametres 0 (List.rev lp);
-    (* Lors de la création du registre, on décale de 3 places pour le registre *)
+    analyser_parametres 0 (List.rev lp); (* Appel pour traiter les paramètres *)
+
+    (* Analyse du bloc d'instructions de la fonction *)
     let ((nli, tailleBlocLB), tailleBlocSB) = analyse_placement_bloc_fonction li 3 deplSB in
-    let (nliFun, nliStatic) = separer_declaration_static nli in
+
+    (* Séparation des déclarations statiques du bloc d'instructions *)
+    let option_static li =
+      let static_elements = List.filter (fun x -> match x with
+                                                  | AstPlacement.DeclarationStatic _ -> true
+                                                  | _ -> false) li in
+      let function_elements = List.filter (fun x -> match x with
+                                                     | AstPlacement.DeclarationStatic _ -> false
+                                                     | _ -> true) li in
+      (function_elements, static_elements)
+    
+    in
+    let (nliFun, nliStatic) = option_static nli in
+
+    (* Construction du résultat final avec les informations traitées *)
     (AstPlacement.Fonction(info, lp, (nliFun, tailleBlocLB)), (nliStatic, tailleBlocSB))
-  | _-> failwith "Erreur interne Placement Fonction"
+  
+  | _ -> failwith "Erreur interne Placement Fonction"
+
+
 
 (* analyse_placement_fonctions : AstType.fonction list -> int -> AstPlacement.fonction list * (AstPlacement.instruction list * int) *)
 (* Paramètre info : l'info_ast de la fonction analysée *)
@@ -207,14 +189,28 @@ let analyse_placement_fonctions lf deplSB =
     aux lf 0
 
 
-(* analyser : AstType.programme -> AstPlacement.programme *)
-(* Analyse un programme complet *)
+
+
+
+(* analyse_placement_bloc : AstType.bloc -> int -> string -> AstPlacement.bloc * int *)
+(* bloc, dep, reg -> bloc * taille *)
 let analyser (AstType.Programme (vg, fonctions, prog)) =
-  (* Analyse les variables globales dans SB *)
-  let (nvg, taille_var_globales) = analyse_placement_bloc vg 0 "SB" in
-  (* Analyse les fonctions avec le décalage SB actuel *)
-  let (nlf, (li_static, taille_static)) = analyse_placement_fonctions fonctions taille_var_globales in
-  (* Analyse le bloc principal avec le décalage final *)
-  let (nprog, _) = analyse_placement_bloc prog taille_static "SB" in
-  (* Construit le programme final *)
-  AstPlacement.Programme ((nvg, taille_var_globales), nlf, (li_static, taille_static), (nprog, taille_static))
+  (* Définir une fonction pour l'analyse du programme *)
+  let analyser_programme vg fonctions prog =
+    (* Étape 1 : Traiter les variables globales dans SB *)
+    let (nvg, globales) = analyse_placement_bloc vg 0 "SB" in
+    (* Étape 2 : Traiter les fonctions en fonction des variables globales analysées *)
+    let (nlf, (li_static, taille_static)) = analyse_placement_fonctions fonctions globales in
+    (* Étape 3 : Calculer le déplacement de SB après les variables statiques et globales *)
+    let deplSB = taille_static + globales in
+    (* Étape 4 : Traiter le bloc principal avec le déplacement actuel de SB *)
+    let bloc_main = analyse_placement_bloc prog deplSB "SB" in
+    (* Retourner le programme complet *)
+    (nvg, globales), nlf, (li_static, deplSB), bloc_main
+  in
+
+  (* Appliquer l'analyse sur le programme donné *)
+  let (blocGlobale, nlf, blocStatique, bloc_main) = analyser_programme vg fonctions prog in
+
+  (* Construire le programme final avec les informations traitées *)
+  AstPlacement.Programme (blocGlobale, nlf, blocStatique, bloc_main)

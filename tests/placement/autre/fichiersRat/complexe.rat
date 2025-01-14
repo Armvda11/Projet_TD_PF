@@ -1,0 +1,20 @@
+static int x = 42;
+static bool y = false;
+
+int mult(int a, rat* r) {
+    rat temp = [5/2];
+    int b = num(*r);
+    return a ;
+}
+
+bool compare(rat* r1, rat* r2) {
+    return ((num(*r1)) < (num(*r2)));
+}
+
+main {
+    rat r1 = [3/4];
+    rat r2 = [7/8];
+
+    bool result = compare(&r1, &r2);
+    int final = mult(2, &r2);
+}

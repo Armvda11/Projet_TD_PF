@@ -1,0 +1,16 @@
+int compute (int a, bool b = true, rat c = [2/3]) {
+    if (b) {
+        return ( num(c));
+    } else {
+        return (a);
+    }
+}
+
+main {
+    int x = 4;
+    bool y = false;
+    rat z = [5/7];
+    print compute(x, y, z);
+    print compute(x, y);
+    print compute(x);
+}

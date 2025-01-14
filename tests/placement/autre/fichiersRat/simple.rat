@@ -1,0 +1,5 @@
+static bool a = false;
+
+test{
+    rat b = [2/3];
+}
