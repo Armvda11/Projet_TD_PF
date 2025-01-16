@@ -1,0 +1,10 @@
+static int global = 100; // Variable globale
+
+int multiply(int a, int b = global) { // b prend la valeur de la variable globale si non spécifié
+  return (a * b);
+}
+
+test {
+  print multiply(2);    // Utilise global (100) comme valeur par défaut
+  print multiply(2, 10); // Spécifie explicitement b (10)
+}

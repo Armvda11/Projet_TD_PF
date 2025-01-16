@@ -1,0 +1,14 @@
+static int global = 3;
+
+int add(int a, int b = global) {
+  return (a + b);
+}
+
+int multiply(int x, int y = add(2)) { 
+  return (x * y);
+}
+
+test {
+  print multiply(4);      
+  print multiply(4, 10);  
+}

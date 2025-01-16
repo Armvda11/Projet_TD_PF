@@ -1,8 +1,8 @@
 open Tds
-open Exceptions
+
 open Ast.AstPlacement
 open Ast
-open String
+
 open Type
 open Code
 open Tam
@@ -14,7 +14,7 @@ type t2 = string
 (*AstPlacement.affectable (AstType.affectable) -> a -> string*)
 (*Paramètre a : affectable à analyser*)
 (*Retour : le code TAM correspondant à l'affectable*)
-let rec analyse_code_affectable a en_ecriture =
+let rec analyse_code_affectable a write =
   (* on vérifie que l'information est bien une variable *)
   match a with
   (* l'affectable est un identifiant *)
@@ -23,7 +23,7 @@ let rec analyse_code_affectable a en_ecriture =
       match !info with
       | InfoVar(_, t, d, reg) ->
         let taille_type = getTaille t in
-        if en_ecriture then
+        if write then
           store taille_type d reg
         else
           load taille_type d reg
@@ -54,7 +54,7 @@ let rec analyse_code_affectable a en_ecriture =
     (* on récupère la taille du type de l'affectable *)
     let t = getTaille (type_affectable a)in
     let code = analyse_code_affectable na false in
-    if en_ecriture then
+    if write then
       code ^ (storei t)
     else
       code ^ (loadi t)
@@ -118,7 +118,6 @@ let rec analyse_code_expression e =
       | EquInt| EquBool -> Tam.subr "Ieq" 
       | Inf -> Tam.subr "ILss" 
       | Fraction -> ""
-      | _ -> failwith "Opérateur binaire non supporté dans analyse_code_expression"
     in 
     expr1 ^ expr2 ^ code_val
 

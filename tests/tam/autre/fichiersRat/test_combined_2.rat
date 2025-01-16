@@ -1,0 +1,20 @@
+static int global = 42;
+
+int manipulate_static_and_global() {
+  static int local_static = 5; // Variable statique locale
+  int* ptr_static = &local_static; 
+  int* ptr_global = &global;       
+
+  *ptr_static = (*ptr_static + 1);   
+  *ptr_global = (*ptr_global + 2);   
+
+  print local_static; 
+  print global;       
+  return 1;
+}
+
+test {
+    int x =0;
+ x = manipulate_static_and_global(); 
+  x =manipulate_static_and_global(); 
+}

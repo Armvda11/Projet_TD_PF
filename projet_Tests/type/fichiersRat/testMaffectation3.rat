@@ -1,5 +1,0 @@
-test{
-    bool* b= null;
-    rat* x=null;
-    *b=(*x);
-}

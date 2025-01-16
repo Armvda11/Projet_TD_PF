@@ -1,0 +1,13 @@
+static int global = 100; 
+
+int compute(int x, int y = 10) {
+  static int static_counter = 0; 
+  static_counter = (static_counter + 1); 
+  return ((global + y) + static_counter); 
+}
+
+test {
+  print compute(5);      
+  print compute(10, 20); 
+  print compute(15);    
+}

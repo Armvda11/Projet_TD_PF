@@ -88,4 +88,3 @@ let%expect_test "factiter" =
 let%expect_test "complique" =
   runtam (pathFichiersRat^"complique.rat");
   [%expect{| [9/4][27/14][27/16][3/2] |}]
-

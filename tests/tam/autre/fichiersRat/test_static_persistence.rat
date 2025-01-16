@@ -1,0 +1,13 @@
+int counter() {
+  static int count = 0; // Variable statique locale
+  count = (count + 1);    // Incrémente la variable à chaque appel
+  print count;
+  return 1;
+}
+
+test {
+    int x = 0;
+    x =counter();
+    x =counter(); 
+    x =counter(); 
+}

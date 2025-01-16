@@ -1,3 +1,3 @@
 test {
-    int* x = (new bool);
+    int* x = (new int);
 }

@@ -66,6 +66,7 @@ struct
           | Fraction -> "["^(string_of_expression e1)^"/"^(string_of_expression e2)^"] "
           | _ -> (string_of_expression e1)^(string_of_binaire b)^(string_of_expression e2)^" "
         end
+    | _ -> "Not implemented yet"
 
   (* Conversion des affectables *)
   and string_of_affectable af =

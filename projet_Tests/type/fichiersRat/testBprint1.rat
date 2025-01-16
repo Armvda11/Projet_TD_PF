@@ -1,9 +1,0 @@
-int* add(int a, int b){
-    int r = 0;
-    r= (a+b);
-    return (&r);
-}
-
-test{
-    print (add(1,2));
-}

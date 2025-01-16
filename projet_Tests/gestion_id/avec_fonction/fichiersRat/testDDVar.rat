@@ -1,9 +1,0 @@
-int add (int* a, int*b){
-    rat* px= (new rat);
-    rat* px= (new rat);
-    return ((*a)+(*b));
-}
-
-test{
-    int x=3;
-}

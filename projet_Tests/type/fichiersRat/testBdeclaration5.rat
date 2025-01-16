@@ -1,9 +1,0 @@
-rat* add(int a, int b){
-    rat y= [a/b];
-    return (&y);
-}
-
-test{
-    rat* x= null;
-    x= add(5,6);
-}

@@ -1,5 +1,0 @@
-static int* px= null;
-
-test{
-    int a= (*px);
-}

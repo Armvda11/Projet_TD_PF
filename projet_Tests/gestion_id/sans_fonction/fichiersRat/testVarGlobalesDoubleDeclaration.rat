@@ -1,9 +1,0 @@
-static int a = 0;
-static rat * a = (new rat);
-
-test{
-    b = a;
-    rat b= (*a) ;
-    int* px= (new int);
-    px=a;
-}

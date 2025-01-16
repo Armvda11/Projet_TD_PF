@@ -1,5 +1,0 @@
-test{
-    rat* c= null;
-    bool* b= (new bool);
-    b=c;
-}

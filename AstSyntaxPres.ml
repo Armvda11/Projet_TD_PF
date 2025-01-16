@@ -34,10 +34,7 @@ _build/default/.rat.objs/rat__Tds.intf.all-deps
  type affectable = 
    | Ident of string
    | Deref of affectable
- 
- 
- 
- 
+  
  (* Expressions de Rat *)
  type expression =
    (* Appel de fonction représenté par le nom de la fonction et la liste des paramètres réels *)
@@ -78,8 +75,6 @@ _build/default/.rat.objs/rat__Tds.intf.all-deps
    | TantQue of expression * bloc
    (* return d'une fonction *)
    | Retour of expression
- 
- 
  
  type default = Default of expression
  (* Structure des fonctions de Rat *)

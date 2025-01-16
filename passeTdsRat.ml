@@ -6,9 +6,7 @@ open Ast
 type t1 = Ast.AstSyntax.programme
 type t2 = Ast.AstTds.programme
 
-type affouexpTds =
-  | Affectable of AstTds.affectable
-  | Expression of AstTds.expression
+
 
 
 (* analyse_tds_affectable : tds -> AstSyntax.affectable -> AstTds.affectable *)
@@ -31,7 +29,7 @@ let rec analyse_tds_affectable tds af modifiable =
           (* Vérification si l'identifiant est utilisé correctement *)
           match !info with
           | InfoVar _ -> AstTds.Ident info (* L'identifiant est correctement utilisé, on crée un identifiant dans l'AstTds *)
-          | InfoConst (_, v) -> if modifiable then raise (MauvaiseUtilisationIdentifiant n) else
+          | InfoConst (_, _) -> if modifiable then raise (MauvaiseUtilisationIdentifiant n) else
             AstTds.Ident info (* Utilisation correcte de la constante *)
           | _ -> raise (MauvaiseUtilisationIdentifiant n)
         end
@@ -238,20 +236,21 @@ and analyse_tds_bloc tds oia li =
    nli
 
 
-
-
-let analyse_variable_globale tds (AstSyntax.DeclarationGlobale(t,n,e)) =
-  match chercherLocalement tds n with
-  | None -> 
-    let ne = analyse_tds_expression tds e in
-    let info = InfoVar(n, t, 0, "") in
-    let ia = info_to_info_ast info in
-    ajouter tds n ia;
-    AstTds.Declaration(t, ia, ne)
-  | Some _ -> raise (DoubleDeclaration n)
-
-
-
+(* analyse_variable_globale : tds -> AstSyntax.declaration_globale -> AstTds.declaration_globale *)
+(* Paramètre tds : la table des symboles courante *)
+(* Paramètre : la déclaration globale à analyser *)
+(* Vérifie la bonne utilisation des identifiants et tranforme la déclaration *)
+let analyse_variable_globale tds (AstSyntax.DeclarationGlobale(t, n, e)) =
+    (* Vérifie si la variable n'est pas déjà déclarée localement *)
+    if chercherLocalement tds n <> None then
+      raise (DoubleDeclaration n)
+    else
+      let ne = analyse_tds_expression tds e in
+      let info = InfoVar(n, t, 0, "") in
+      let ia = info_to_info_ast info in
+      ajouter tds n ia;
+      AstTds.Declaration(t, ia, ne)
+  
 
 (* analyse_tds_fonction : tds -> AstSyntax.fonction -> AstTds.fonction *)
 (* Paramètre tds : la table des symboles courante *)

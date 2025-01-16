@@ -1,4 +1,0 @@
-test{
-    rat* px= (new rat);
-    rat* pz=px;
-}

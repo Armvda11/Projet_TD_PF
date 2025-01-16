@@ -1,0 +1,12 @@
+static int global = 5; 
+
+bool update_global(int value) {
+  global = value; 
+  return true;
+}
+
+test {
+  print global;     
+  bool res = update_global(42); 
+  print global;      
+}

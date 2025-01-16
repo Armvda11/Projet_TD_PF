@@ -1,6 +1,0 @@
-test{
-    int* px=null;
-    int* pz= (new int);
-    int x = 0;
-    x= ((*px)+(*pz));
-}

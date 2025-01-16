@@ -1,0 +1,11 @@
+int adder(int x) {
+  static int total = 0; 
+  total = (total + x);    
+  return total;
+}
+
+test {
+  print adder(5);  
+  print adder(10); 
+  print adder(-3);
+}

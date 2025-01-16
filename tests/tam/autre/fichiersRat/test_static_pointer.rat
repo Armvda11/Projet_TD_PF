@@ -1,0 +1,14 @@
+int update_static() {
+  static int value = 42; 
+  int* ptr = &value;     
+  *ptr = (*ptr + 1);        
+  print value;
+  return 1;
+}
+
+test {
+    int x = 0;
+  x =update_static();
+  x =update_static(); 
+  x= update_static(); 
+}

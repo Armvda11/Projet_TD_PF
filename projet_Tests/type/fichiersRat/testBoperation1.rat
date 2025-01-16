@@ -1,5 +1,0 @@
-test{
-    int* px= null;
-    int** pz= null;
-    bool b= ((*px)<(**pz));
-}

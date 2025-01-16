@@ -1,4 +1,0 @@
-test{
-    rat* px= (new rat);
-    int x= num px;
-}

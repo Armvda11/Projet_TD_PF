@@ -1,0 +1,9 @@
+static int x = 10; 
+int add(int a, int b = x) { 
+  return (a + b);
+}
+
+test {
+  print add(5);  
+  print add(5, 20); 
+}

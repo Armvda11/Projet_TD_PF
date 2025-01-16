@@ -1,0 +1,8 @@
+static int global = 30; // Variable globale
+
+test {
+  int* p = &global;
+  print *p;         
+  *p = 50;          
+  print global;     
+}

@@ -1,4 +1,0 @@
-test{
-    bool* b= (new bool);
-    int* a= b;
-}

@@ -1,8 +1,0 @@
-static int * a = (new int);
-
-test{
-    *a = 3;
-    int b= (*a) ;
-    int* px= (new int);
-    px=a;
-}

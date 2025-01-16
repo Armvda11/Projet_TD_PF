@@ -1,8 +1,0 @@
-int add (int* a, int* a){
-    int* px= (new int);
-    return ((*a));
-}
-
-test{
-    int x=3;
-}

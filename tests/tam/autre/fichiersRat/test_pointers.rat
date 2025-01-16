@@ -1,0 +1,7 @@
+test {
+  int a = 42;
+  int* p = &a;  // Pointeur vers a
+  print *p;     // Affiche la valeur pointée par p (42)
+  *p = 15;      // Change la valeur de a via le pointeur
+  print a;      // Affiche la nouvelle valeur de a (15)
+}

@@ -1,6 +1,5 @@
 open Rat
 open Compilateur
-open Exceptions
 
 exception ErreurNonDetectee
 
@@ -35,8 +34,8 @@ let%test_unit "testAcces1" =
 let%test_unit "testAcces2" = 
   let _ = compiler (pathFichiersRat^"testAcces2.rat") in ()
 
-let%test_unit "testNullAcces" = 
-  let _ = compiler (pathFichiersRat^"testNullAcces.rat") in ()
+let%test_unit "testValAcces" = 
+  let _ = compiler (pathFichiersRat^"testValAcces.rat") in ()
 
 let%test_unit "testNullInitialisation" = 
   let _ = compiler (pathFichiersRat^"testNullInitialisation.rat") in ()

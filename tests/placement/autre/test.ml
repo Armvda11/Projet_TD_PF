@@ -58,23 +58,23 @@ let%test "mult_b" =
 
 
   let%test "main_r1" = 
-  test (pathFichiersRat^"complexe.rat") "main" ("r1", 1) (0, "SB")
+  test (pathFichiersRat^"complexe.rat") "main" ("r1", 1) (2, "SB")
 
 let%test "main_r2" = 
-  test (pathFichiersRat^"complexe.rat") "main" ("r2", 1) (2, "SB")
+  test (pathFichiersRat^"complexe.rat") "main" ("r2", 1) (4, "SB")
 
 
 let%test "main_result" = 
-  test (pathFichiersRat^"complexe.rat") "main" ("result", 1) (4, "SB")
+  test (pathFichiersRat^"complexe.rat") "main" ("result", 1) (6, "SB")
 
 let%test "main_final" = 
-  test (pathFichiersRat^"complexe.rat") "main" ("final", 1) (5, "SB")
+  test (pathFichiersRat^"complexe.rat") "main" ("final", 1) (7, "SB")
 
 
 
 
   let%test "simple_main_c" = 
-  test (pathFichiersRat^"simple.rat") "main" ("b", 1) (0, "SB")
+  test (pathFichiersRat^"simple.rat") "main" ("b", 1) (1, "SB")
 
 
 

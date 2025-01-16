@@ -205,10 +205,15 @@ let analyse_type_fonction (AstTds.Fonction(t, n, lp, li)) =
   (* Construire et retourner la fonction typée *)
   Fonction(n, liste_param, nli)
 
-
+(* analyse_type_variable_globale : AstTds.declaration_globale -> AstType.declaration_globale *)
+(* parametre : AstTds.declaration_globale *)
+(* retourne : AstType.declaration_globale *)
   let analyse_type_variable_globale (AstTds.DeclarationGlobale(info, e)) =
+    (* Analyser le type de l'expression *)
     let (ne, te) = analyse_type_expression e in
+    (* Extraire le type de la variable *)
     match info_ast_to_info info with
+    (* Vérifier que le type de l'expression est compatible avec le type de la variable *)
     | InfoFun (_, t, _,_) | InfoVar (_, t, _, _) ->
         if est_compatible t te then
           AstType.DeclarationGlobale(info, ne)

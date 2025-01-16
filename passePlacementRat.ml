@@ -51,8 +51,6 @@ let rec analyse_placement_instruction i dep reg = match i with
   | AstType.TantQue(c,b) ->
     let nbb = analyse_placement_bloc b dep reg in
     (TantQue(c,nbb),0)
-  (* l'instruction est une affectation *)
-  | AstType.Affectation(ia,e) -> (Affectation(ia,e),0)
   (* l'instruction est un affichage *)
   | AstType.AffichageInt e -> (AffichageInt(e),0)
   (* l'instruction est un affichage Rat*)
@@ -89,32 +87,31 @@ and  analyse_placement_bloc li dep reg = match li with
 (* Analyse un bloc d'instructions d'une fonction *)
 (* Met à jour les Infos de la TDS et renvoie le bloc d'instructions avec la taille du bloc dans le registre LB *)
 (* et la taille prise dans le registre SB et est de type (AstPlacement.instruction * int) * int *)
-
 let rec analyse_placement_bloc_fonction li deplLB deplSB =
   match li with
-  | h::q ->
-    (* Analyse l'instruction courante directement dans cette fonction *)
-    let ((instr, tailleLB), tailleSB) = 
-      (match h with
-       | AstType.DeclarationStatic (info, e) ->
-         (* Traitement spécial pour les variables statiques locales *)
-         let (_, t, _, _) = (match (info_ast_to_info info) with
-         | InfoVar(nom, t, d, reg) -> (nom, t, d, reg)
-         | _ -> failwith "Mauvaise utilisation de la fonction pour récupérer les infos var" )in
-         let taille = getTaille t in
-         modifier_adresse_variable deplSB "SB" info;
-         ((AstPlacement.DeclarationStatic(info, e), 0), taille)
-       | _ ->
-         (* Traitement standard pour les autres instructions *)
-         (analyse_placement_instruction h deplLB "LB", 0))
-    in
-    (* Analyse récursive des instructions suivantes *)
-    let ((instructionsSuivantes, tailleBlocActuelleLB), tailleBlocActuelleSB) =
-      analyse_placement_bloc_fonction q (deplLB + tailleLB) (deplSB + tailleSB)
-    in
-    (* Combine les résultats *)
-    ((instr::instructionsSuivantes, tailleLB + tailleBlocActuelleLB), tailleSB + tailleBlocActuelleSB)
-  | [] -> ([], 0), 0
+  | [] -> ([], 0), 0  (* Cas de base : liste vide *)
+  | h :: q ->
+      (* Analyse de l'instruction courante *)
+      let ((instr, tailleLB), tailleSB) =
+        match h with
+        | AstType.DeclarationStatic (info, e) ->
+            (* Traitement des variables statiques locales *)
+            (match info_ast_to_info info with
+             | InfoVar(_, t, _, _) ->
+                 let taille = getTaille t in
+                 modifier_adresse_variable deplSB "SB" info;
+                 ((AstPlacement.DeclarationStatic(info, e), 0), taille)
+             | _ -> failwith "Erreur interne : mauvaise utilisation de DeclarationStatic")
+        | _ ->
+            (* Traitement standard pour les autres instructions *)
+            (analyse_placement_instruction h deplLB "LB", 0)
+      in
+      (* Analyse récursive des instructions suivantes *)
+      let ((instrs_suivants, tailleBlocLB), tailleBlocSB) =
+        analyse_placement_bloc_fonction q (deplLB + tailleLB) (deplSB + tailleSB)
+      in
+      (* Combine les résultats *)
+      ((instr :: instrs_suivants, tailleLB + tailleBlocLB), tailleSB + tailleBlocSB)
 
 
 
@@ -126,67 +123,58 @@ let rec analyse_placement_bloc_fonction li deplLB deplSB =
 (* Analyse le placement d'une fonction. *)
 (* Renvoie la fonction et la liste des instructions des variables statiques avec leur taille *)
 let analyse_placement_fonction (AstType.Fonction(info, lp, li)) deplSB =
-  (* Analyse le placement des paramètres et du bloc d'instructions de la fonction *)
-  match (info_ast_to_info info) with
-  (* Cas d'une fonction *)
+  (* Vérification que l'information est bien une fonction *)
+  match info_ast_to_info info with
   | InfoFun(_, _, _, _) ->
-    (* Traitement des paramètres de la fonction intégré directement dans l'analyse de la fonction *)
+    (* Analyse des paramètres de la fonction *)
     let analyser_parametres tailleActuelleParam lst =
-      (* Analyse des paramètres de la fonction *)
-      let _ = List.fold_left (fun tailleActuelle h ->
-        match (info_ast_to_info h) with
+      List.fold_left (fun tailleActuelle h ->
+        match info_ast_to_info h with
         | InfoVar(_, t, _, _) ->
-            let nouvelleTailleParam = tailleActuelle - (getTaille t) in
+            let nouvelleTailleParam = tailleActuelle - getTaille t in
             modifier_adresse_variable nouvelleTailleParam "LB" h; (* Mise à jour des adresses *)
-            nouvelleTailleParam (* Retourner la nouvelle taille de paramètre *)
+            nouvelleTailleParam
         | _ -> failwith "Erreur interne paramètres fonction"
-      ) tailleActuelleParam lst in
-      ()
-    
+      ) tailleActuelleParam lst
     in
-    analyser_parametres 0 (List.rev lp); (* Appel pour traiter les paramètres *)
+    let _ = analyser_parametres 0 (List.rev lp) in (* Traiter les paramètres *)
 
     (* Analyse du bloc d'instructions de la fonction *)
     let ((nli, tailleBlocLB), tailleBlocSB) = analyse_placement_bloc_fonction li 3 deplSB in
 
-    (* Séparation des déclarations statiques du bloc d'instructions *)
-    let option_static li =
-      let static_elements = List.filter (fun x -> match x with
-                                                  | AstPlacement.DeclarationStatic _ -> true
-                                                  | _ -> false) li in
-      let function_elements = List.filter (fun x -> match x with
-                                                     | AstPlacement.DeclarationStatic _ -> false
-                                                     | _ -> true) li in
-      (function_elements, static_elements)
-    
+    (* Séparation des déclarations statiques et des instructions *)
+    let static_elements, function_elements =
+      List.partition (function AstPlacement.DeclarationStatic _ -> true | _ -> false) nli
     in
-    let (nliFun, nliStatic) = option_static nli in
 
-    (* Construction du résultat final avec les informations traitées *)
-    (AstPlacement.Fonction(info, lp, (nliFun, tailleBlocLB)), (nliStatic, tailleBlocSB))
+    (* Retourner le résultat final *)
+    (AstPlacement.Fonction(info, lp, (function_elements, tailleBlocLB)), 
+     (static_elements, tailleBlocSB))
   
   | _ -> failwith "Erreur interne Placement Fonction"
 
 
 
-(* analyse_placement_fonctions : AstType.fonction list -> int -> AstPlacement.fonction list * (AstPlacement.instruction list * int) *)
-(* Paramètre info : l'info_ast de la fonction analysée *)
-(* Paramètre lp : la liste des info_ast des paramètes de la fonction *)
-(* Paramètre li : le bloc des instructions de la fonction *)
-(* Analyse le placement des fonctions. *)
-(* Renvoie la liste des fonctions et la liste des instructions des variables statiques avec sa taille totale *)
 
+(* analyse_fonctions : AstType.fonction list -> int -> AstPlacement.fonction list * (AstPlacement.instruction list * int) *)
+(* Paramètre lf : la liste des fonctions à analyser *)
+(* Paramètre deplSB : le déplacement actuel dans le registre SB *)
+(* Analyse le placement de plusieurs fonctions *)
+(* Renvoie la liste des fonctions analysées et la liste des instructions des variables statiques avec leur taille *)
 let analyse_fonctions lf deplSB =
-  (* On défini une fonction auxiliaire pour prendre en compte le décalage dans le registre SB*)
   let rec aux lst depl =
-  match lst with
-  | h::q ->
-    let (niFun, (liStatic, tailleFonctionSB)) = analyse_placement_fonction h (deplSB + depl) in
-      let (nlf, (nliStatic, tailleActuelleFonctionsSB)) = aux q (tailleFonctionSB + depl) in
-        (niFun::nlf, (nliStatic@liStatic, tailleActuelleFonctionsSB))
-  | [] -> ([],([], depl))
+    match lst with
+    | [] -> ([], ([], depl)) (* Cas de base : liste vide *)
+    | h :: q ->
+        (* Analyse de la fonction courante *)
+        let (niFun, (liStatic, tailleFonctionSB)) = analyse_placement_fonction h (deplSB + depl) in
+        (* Appel récursif pour les fonctions restantes *)
+        let (nlf, (nliStatic, tailleTotalSB)) = aux q (tailleFonctionSB + depl) in
+        (* Construction du résultat *)
+        (niFun :: nlf, (liStatic @ nliStatic, tailleTotalSB))
   in
-    aux lf 0
+  aux lf 0
+
 
 
 

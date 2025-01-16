@@ -1,4 +1,0 @@
-test{
-    int* px= (new int);
-    int** pz= &px;
-}

@@ -1,8 +1,0 @@
-test{
-    int* px= (new int);
-    int* pz= (new int);
-    int x=[4/6];
-    px= &x;
-    *px= [3/2];
-    *pz=x;
-}

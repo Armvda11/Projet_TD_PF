@@ -1,9 +1,0 @@
-test{
-    int x=8;
-    int* pz= (new int);
-    int** p= null;
-    int** p2=&pz;
-    (*p)= pz;
-    (**p)=x;
-    x=(**p);
-}

@@ -1,6 +1,0 @@
-test{
-    rat* px= (new rat);
-    rat* py= null;
-    rat z= [4/6];
-    rat* pz= &z;
-}

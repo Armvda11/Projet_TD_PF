@@ -1,4 +1,4 @@
 test {
-    int y = null;
+    int* y = null;
     int x = (*y);
 }

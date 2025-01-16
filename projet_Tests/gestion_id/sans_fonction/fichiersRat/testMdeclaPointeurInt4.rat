@@ -1,4 +1,0 @@
-test{
-    const x=2;
-    int* px= &x;
-}
